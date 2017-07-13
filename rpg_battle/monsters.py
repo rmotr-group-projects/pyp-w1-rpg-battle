@@ -1,4 +1,5 @@
 from .exceptions import *
+#This is my second comment
 class Monster(object):
 
     def __init__(self, level=1):
