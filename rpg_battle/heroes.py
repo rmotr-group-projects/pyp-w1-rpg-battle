@@ -1,7 +1,7 @@
 from .exceptions import *
-
+### GIT PULL####
 class Hero(object):
-    
+
     def __init__(self, level=1):
         """
         Sets stats up and levels up hero if necessary.
@@ -57,7 +57,7 @@ class Warrior(Hero):
     constitution +2
     speed -1
     """
-    
+
     def shield_slam(self, target):
         """
         cost: 5 mp
