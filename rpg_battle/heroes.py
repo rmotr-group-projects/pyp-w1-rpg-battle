@@ -1,5 +1,5 @@
 from .exceptions import *
-### GIT PULL####
+
 class Hero(object):
 
     def __init__(self, level=1):
