@@ -1,5 +1,10 @@
 from .exceptions import *
+<<<<<<< HEAD
 #This is my second comment
+#This is another comment
+=======
+#### new comments ###
+>>>>>>> 8da90a8b8b404ae42e2bd76c50bb165c7baba6fb
 class Monster(object):
 
     def __init__(self, level=1):
