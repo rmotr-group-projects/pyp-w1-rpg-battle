@@ -1,7 +1,6 @@
 from .exceptions import *
-#I will be working on this
 class Monster(object):
-    
+
     def __init__(self, level=1):
         """
         Sets up stats and levels up the monster if necessary
@@ -81,7 +80,7 @@ class GreenDragon(Dragon):
     speed multiplier: 1.5
     command queue: poison_breath, tail_swipe, fight
     """
-    
+
     def poison_breath(self, target):
         """
         damage: (intelligence + constitution) * 1.5
@@ -109,7 +108,7 @@ class Vampire(Undead):
     intelligence multiplier: 2
     command queue: fight, bite, life_drain
     """
-    
+
     def bite(self, target):
         """
         damage: speed * 0.5
@@ -126,7 +125,7 @@ class Skeleton(Undead):
     intelligence multiplier: 0.25
     command queue: bash, fight, life_drain
     """
-    
+
     def bash(self, target):
         """
         damage: strength * 2
@@ -148,7 +147,7 @@ class Troll(Humanoid):
     constitution multiplier: 1.5
     base hp: 20
     """
-    
+
     def regenerate(self, *args):
         """
         heals self for constitution
@@ -161,12 +160,10 @@ class Orc(Humanoid):
     strength multiplier: 1.75
     base hp: 16
     """
-    
+
     def blood_rage(self, target):
         """
         cost: constitution * 0.5 hp
         damage: strength * 2
         """
         pass
-
-        
