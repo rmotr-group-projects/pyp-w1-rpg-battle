@@ -21,7 +21,9 @@ class BattleTestCase(unittest.TestCase):
                         monsters.Orc(),
                         monsters.GreenDragon()]
         battle = Battle(participants)
+        
         self.assertTrue(isinstance(battle.current_attacker(), monsters.GreenDragon))
+        
 
 # initiatve order: GreenDragon, Orc, Mage, Warrior
 
