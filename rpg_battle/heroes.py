@@ -3,10 +3,16 @@ from .exceptions import *
 class Hero(object):
 
     def __init__(self, level=1):
-        """
-        Sets stats up and levels up hero if necessary.
-        """
-        pass
+        self.strength = 6 * level
+        self.constitution = 6 * level
+        self.intelligence = 6 * level
+        self.speed = 6 * level
+        self.maxhp = int(100 + 0.5 * self.constitution)
+        self.maxmp= int(50 + 0.5 * self.intelligence)
+        self.hp = int(self.maxhp)
+        self.mp = int(self.maxmp)
+        self.level= level
+
 
     def xp_for_next_level(self):
         """
@@ -14,13 +20,13 @@ class Hero(object):
         By default this should be 10 times current level, so 10 for
         level 1, 20 for level 2, etc.
         """
-        pass
+        return self.level * 10
 
     def fight(self, target):
         """
         Attacks target, dealing damage equal to the user's strength.
         """
-        pass
+        return target.take_damage(self.strength)
 
     def gain_xp(self, xp):
         """
