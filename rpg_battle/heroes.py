@@ -12,6 +12,7 @@ class Hero(object):
         self.hp = int(self.maxhp)
         self.mp = int(self.maxmp)
         self.level= level
+        self.xp = 0
 
 
     def xp_for_next_level(self):
@@ -35,7 +36,14 @@ class Hero(object):
         enough xp to increase its total to 12 xp it would level up and
         then have an xp total of 2.
         """
-        pass
+        self.xp += xp
+        attributes = ['strength', 'constitution', 'speed', 'intelligence', 'level']
+        if self.xp >= self.xp_for_next_level():
+            self.xp = self.xp - self.xp_for_next_level()
+            for stat in attributes:
+                setattr(self, stat, getattr(self, stat) + 1)
+
+
     def take_damage(self, damage):
         """
         Reduce hp by damage taken.
