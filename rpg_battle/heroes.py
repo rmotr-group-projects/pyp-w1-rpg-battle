@@ -1,4 +1,4 @@
-from .exceptions import *
+from exceptions import *
 
 class Hero(object):
     
@@ -41,7 +41,10 @@ class Hero(object):
         """
         Attacks target, dealing damage equal to the user's strength.
         """
-        target.take_damage(self.strength)
+        dam = self.strength
+        target.take_damage(dam)
+        return dam, 'fight'
+        
 
     def gain_xp(self, xp):
         """
@@ -53,6 +56,7 @@ class Hero(object):
         self.xp += xp
         if xp >= self.xp_for_next_level():
             self.level_up()
+            return "{unit} is now level {level}!".format(unit = type(self).__name__, level = self.level)
             
     def level_up(self):
         
@@ -111,6 +115,21 @@ class Hero(object):
             return True
         else:
             return False
+    
+    def attack(self, command, target):
+        """
+        Attacks target using next ability in command queue
+        """
+        
+       
+        
+        attack_method = getattr(self, command, 'fight')
+        
+        dam, attack_type = attack_method(target)
+        
+        
+        
+        return "{h} hits {target} with {ability} for {damage} damage!".format(h = type(self).__name__, target = type(target).__name__, ability = attack_type, damage = dam)
 
 
 class Warrior(Hero):
@@ -135,7 +154,9 @@ class Warrior(Hero):
         """
         if self.mp >= 5:
             self.mp -= 5
-            target.take_damage(int(1.5 * self.strength))
+            dam = int(1.5 * self.strength)
+            target.take_damage(dam)
+            return dam, 'shield slam'
         else:
             raise InsufficientMP()
         
@@ -145,8 +166,10 @@ class Warrior(Hero):
         cost: 4 hp
         damage: 2 * strength
         """
-        target.take_damage(int(2 * self.strength))
+        dam = int(2 * self.strength)
+        target.take_damage(dam)
         self.take_damage(4)
+        return dam, 'reckless charge'
 
 class Mage(Hero):
     """
@@ -168,7 +191,9 @@ class Mage(Hero):
         """
         if self.mp >= 8:
             self.mp -= 8
-            target.take_damage(int(6 + (0.5 * self.intelligence)))
+            dam = int(6 + (0.5 * self.intelligence))
+            target.take_damage(dam)
+            return dam, 'fireball'
         else:
             raise InsufficientMP()
         
@@ -180,7 +205,9 @@ class Mage(Hero):
         """
         if self.mp >= 3:
             self.mp -= 3
-            target.take_damage(3 + self.level)
+            dam = 3 + self.level
+            target.take_damage(dam)
+            return dam, 'frostbolt'
         else:
             raise InsufficientMP()
 
@@ -214,7 +241,9 @@ class Cleric(Hero):
         """
         if self.mp >= 7:
             self.mp -= 7
-            target.take_damage(int(.5 * self.intelligence + self.constitution))
+            dam = int(.5 * self.intelligence + self.constitution)
+            target.take_damage(dam)
+            return dam, 'smite'
         else:
             raise InsufficientMP()
 
@@ -241,7 +270,9 @@ class Rogue(Hero):
         damage: 2 * strength
         """
         if target.hp == target.maxhp:
-            target.take_damage(int(2 * self.strength))
+            dam = int(2 * self.strength)
+            target.take_damage(dam)
+            return dam, 'backstab'
         else:
             raise InvalidTarget()
 
@@ -252,6 +283,8 @@ class Rogue(Hero):
         """
         if self.mp >= 5:
             self.mp -= 5
-            target.take_damage(int(4 + self.speed))
+            dam = int(4 + self.speed)
+            target.take_damage(dam)
+            return dam, 'rapid strike'
         else:
             raise InsufficientMP()

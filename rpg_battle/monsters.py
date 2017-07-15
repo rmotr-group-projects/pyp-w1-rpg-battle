@@ -2,11 +2,13 @@ from .exceptions import *
 
 class Monster(object):
     
+    command_queue = ['fight']
+    
     def __init__(self, level=1):
         """
         Sets up stats and levels up the monster if necessary
         """
-        attack_queue_index = 0
+        self.attack_queue_index = 0
         self.level = 1
         
         self.strength = 8 * getattr(self, 'MODSTR', 1)
@@ -16,6 +18,8 @@ class Monster(object):
         
         self.maxhp = getattr(self, 'BASE_HP', 10)
         self.hp = self.maxhp
+        
+        
         
         if level > 1:
             self.level = level
@@ -44,7 +48,8 @@ class Monster(object):
         """
         Attacks target dealing damage equal to strength
         """
-        target.take_damage(self.strength)
+        dam = target.take_damage(self.strength)
+        return dam, 'fight'
 
 
     def take_damage(self, damage):
@@ -66,6 +71,7 @@ class Monster(object):
         Returns True if out of hp
         """
         if self.hp <= 0:
+            
             return True
         else:
             return False
@@ -75,12 +81,20 @@ class Monster(object):
         """
         Attacks target using next ability in command queue
         """
-        if self.attack_queue_index > len(self.command_queue):
-            self.attack_queue_index = 0
         
-        attack_method = getattr(self, command_queue[attack_queue_index], 'slash')
-        self.attack_method(target)
+        if self.attack_queue_index >= len(self.command_queue):
+            self.attack_queue_index = 0
+        attack_method = getattr(self, self.command_queue[self.attack_queue_index])
+        
+        dam, attack_type = attack_method(target)
+        
         self.attack_queue_index += 1
+        
+        return "{monster} hits {target} with {ability} for {damage} damage!".format(monster = type(self).__name__, target = type(target).__name__, ability = attack_type, damage = dam)
+        
+        
+        
+        
 
 
 class Dragon(Monster):
@@ -99,14 +113,17 @@ class Dragon(Monster):
         """
         if damage > self.DAMAGE_REDUCTION:
             self.hp -= damage - self.DAMAGE_REDUCTION
+            return damage - self.DAMAGE_REDUCTION
+        else:
+            return 0
     
 
     def tail_swipe(self, target):
         """
         damage: strength + speed
         """
-        target.take_damage(self.strength + self.speed)
-        
+        dam = target.take_damage(self.strength + self.speed)
+        return dam, 'tail swipe'
 
 
 class RedDragon(Dragon):
@@ -126,7 +143,8 @@ class RedDragon(Dragon):
         """
         damage: intelligence * 2.5
         """
-        target.take_damage(int(self.intelligence * 2.5))
+        dam = target.take_damage(int(self.intelligence * 2.5))
+        return dam, 'fire breath'
         
 
 
@@ -139,7 +157,6 @@ class GreenDragon(Dragon):
     MODSTR = 1.5
     MODSPD = 1.5
     
-    name = 'GreenDragon'
     
     command_queue = ['poison_breath', 'tail_swipe', 'fight']
     
@@ -147,8 +164,9 @@ class GreenDragon(Dragon):
         """
         damage: (intelligence + constitution) * 1.5
         """
-        target.take_damage(int(self.intelligence + self.constitution) * 1.5)
-       
+        dam = int((self.intelligence + self.constitution) * 1.5)
+        target.take_damage(int((self.intelligence + self.constitution) * 1.5))
+        return dam, 'poison breath'
 
 
 class Undead(Monster):
@@ -170,10 +188,13 @@ class Undead(Monster):
         damage: intelligence * 1.5
         heals unit for damage done
         """
-        target.take_damage(int(self.intelligence * 1.5))
+        dam = int(self.intelligence * 1.5)
+        target.take_damage(dam)
         self.hp += int(self.intelligence * 1.5)
         if self.hp > self.maxhp:
             self.hp = self.maxhp
+        return dam, 'life drain'
+        
         
 
 
@@ -195,11 +216,14 @@ class Vampire(Undead):
         also reduces target's maxhp by amount equal to damage done
         heals unit for damage done
         """
+        dam = int(self.speed * 0.5)
         target.take_damage(int(self.speed * 0.5))
         target.maxhp -= int(self.speed * 0.5)
         self.hp += int(self.speed * 0.5)
         if self.hp > self.maxhp:
             self.hp = self.maxhp
+        return dam, 'bite'
+        
 
 
 class Skeleton(Undead):
@@ -220,7 +244,9 @@ class Skeleton(Undead):
         """
         damage: strength * 2
         """
-        target.take_damage(self.strength * 2)
+        dam = self.strength * 2
+        target.take_damage(dam)
+        return dam, 'bash'
 
 
 class Humanoid(Monster):
@@ -232,7 +258,9 @@ class Humanoid(Monster):
         """
         damage: strength + speed
         """
-        target.take_damage(self.strength + self.speed)
+        dam = self.strength + self.speed
+        target.take_damage(dam)
+        return dam, 'slash'
 
 
 class Troll(Humanoid):
@@ -242,17 +270,18 @@ class Troll(Humanoid):
     base hp: 20
     """
     
-    name = 'Troll'
-    
     MODSTR = 1.75
     MODCON = 1.5
     BASE_HP = 20
+    
+    command_queue = ['slash', 'fight', 'regenerate']
     
     def regenerate(self, *args):
         """
         heals self for constitution
         """
-        self.heal_damage(self.constitution)
+        heal_amount = self.constitution
+        self.heal_damage(heal_amount)
 
 
 class Orc(Humanoid):
@@ -262,14 +291,17 @@ class Orc(Humanoid):
     """
     MODSTR = 1.75
     BASE_HP = 16
-    name = "Orc"
+    command_queue = ['blood_rage', 'slash', 'fight']
     
     def blood_rage(self, target):
         """
         cost: constitution * 0.5 hp
         damage: strength * 2
         """
+        dam = self.strength * 2
+        
         self.hp -= int(0.5 * self.constitution)
-        target.take_damage(self.strength * 2)
+        target.take_damage(dam)
+        return dam, 'blood rage'
 
         

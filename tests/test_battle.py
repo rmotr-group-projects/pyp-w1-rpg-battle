@@ -40,6 +40,7 @@ class BattleTestCase(unittest.TestCase):
                            ('Orc takes', 'self-inflicted damage!'),
                            ("Mage's turn!",)]
         output = battle.start().splitlines()
+        # assert False, battle.order
         for line, expected in zip(output, expected_output):
             for item in expected:
                 self.assertIn(item, line)
