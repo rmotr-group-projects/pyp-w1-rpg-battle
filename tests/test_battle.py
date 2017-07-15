@@ -3,7 +3,7 @@ import unittest
 from rpg_battle import heroes
 from rpg_battle import monsters
 from rpg_battle.battle import Battle
-from rpg_battle.exceptions import *
+from rpg_battle.exceptions import InsufficientMP, InvalidTarget, InvalidCommand, Defeat, Victory
 
 class BattleTestCase(unittest.TestCase):
     def test_participants(self):
