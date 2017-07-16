@@ -6,10 +6,10 @@ class Hero(object):
     def __init__(self, level=1, base=6):
         # self.strength = 6 * level + str_modifier
         for k,v in Hero.modifiers.items():
-            if v > 0:
+            if v >= 0:
                 setattr(self, k, ((base + self.modifiers[k]) + (level -1) * (self.modifiers[k] +1)))
             else:
-                setattr(self, k, ((base + self.modifiers[k]) + (level -1)))
+                setattr(self, k, ((base + self.modifiers[k] + level -1)))
         # self.strength =
         # self.constitution = (base + cons_modifier) + (level -1) * (cons_modifier +1)
         # self.intelligence = (base + int_modifier) + (level -1) * (int_modifier +1)
