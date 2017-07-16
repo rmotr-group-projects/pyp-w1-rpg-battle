@@ -9,17 +9,25 @@ class Hero(object):
         self.maxmp=int(50 + 0.5 * self.intelligence)
         self.maxhp=int(100 + 0.5 * self.constitution)
         self.speed = 6 * level
-        # self.hp = int(self.maxhp)
-        # self.mp = int(self.maxmp)
+        self.hp = int(self.maxhp)
+        self.mp = int(self.maxmp)
         self.level= level
         self.xp = 0
 
     @property
     def hp(self):
-        return self.maxhp
+        return self._hp
+    @hp.setter
+    def hp(self, value):
+        self._hp = value
+
     @property
     def mp(self):
-        return self.maxmp
+        return self._mp
+    @mp.setter
+    def mp(self, value):
+        self._mp = value
+
 
 
 
