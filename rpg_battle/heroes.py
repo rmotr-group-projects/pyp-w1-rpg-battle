@@ -16,8 +16,8 @@ class Hero(object):
         self.maxmp=int(50 + 0.5 * self.intelligence)
         self.maxhp=int(100 + 0.5 * self.constitution)
         # self.speed = (base + speed_modifier) + (level -1) * (speed_modifier +1)
-        self.hp = int(self.maxhp)
-        self.mp = int(self.maxmp)
+        self.hp = (self.maxhp)
+        self.mp = (self.maxmp)
         self.level= level
         self.xp = 0
 
@@ -64,10 +64,10 @@ class Hero(object):
         attributes = ['strength', 'constitution', 'speed', 'intelligence', 'level']
         if self.xp >= self.xp_for_next_level():
             self.xp = self.xp - self.xp_for_next_level()
-            self.maxhp= int(self.maxhp + 0.5*self.constitution)
-            self.maxmp= int(self.maxmp + 0.5*self.intelligence)
             for stat in attributes:
                 setattr(self, stat, getattr(self, stat) + 1)
+        self.maxhp= int(self.maxhp + 0.5*self.constitution)
+        self.maxmp= int(self.maxmp + 0.5*self.intelligence)        
 
 
     def take_damage(self, damage):
