@@ -68,6 +68,8 @@ class Hero(object):
         Reduce hp by damage taken.
         """
         self.hp = self.hp - damage
+        if self.hp <0:
+            self.hp=0
 
     def heal_damage(self, healing):
         """
@@ -81,7 +83,10 @@ class Hero(object):
         """
         Returns True if out of hp
         """
-        pass
+        if self.hp == 0:
+            return True
+        else:
+            return False
 
 
 class Warrior(Hero):
