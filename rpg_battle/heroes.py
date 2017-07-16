@@ -2,13 +2,20 @@ from .exceptions import *
 
 class Hero(object):
 
-    def __init__(self, level=1,str_modifier=0,cons_modifier=0,int_modifier=0,speed_modifier=0):
-        self.strength = 6 * level + str_modifier
-        self.constitution = 6 * level + cons_modifier
-        self.intelligence = 6 * level + int_modifier
+    def __init__(self, level=1,str_modifier=0,cons_modifier=0,int_modifier=0,speed_modifier=0, base=6):
+        # self.strength = 6 * level + str_modifier
+        modifiers = dict(strength=str_modifier, intelligence=int_modifier, constitution=cons_modifier, speed=speed_modifier)
+        for k,v in modifiers.items():
+            if v > 0:
+                setattr(self, k, ((base + v) + (level -1) * (v +1)))
+            else:
+                setattr(self, k, ((base + v) + (level -1)))
+        # self.strength =
+        # self.constitution = (base + cons_modifier) + (level -1) * (cons_modifier +1)
+        # self.intelligence = (base + int_modifier) + (level -1) * (int_modifier +1)
         self.maxmp=int(50 + 0.5 * self.intelligence)
         self.maxhp=int(100 + 0.5 * self.constitution)
-        self.speed = 6 * level + speed_modifier
+        # self.speed = (base + speed_modifier) + (level -1) * (speed_modifier +1)
         self.hp = int(self.maxhp)
         self.mp = int(self.maxmp)
         self.level= level
@@ -97,8 +104,8 @@ class Warrior(Hero):
     constitution +2
     speed -1
     """
-    def __init__(self):
-        super().__init__(str_modifier = 1, cons_modifier= 2, int_modifier= -2, speed_modifier = -1)
+    def __init__(self, level = 1):
+        super().__init__(str_modifier = 1, cons_modifier= 2, int_modifier= -2, speed_modifier = -1, level = level)
         self.abilities = {'fight', 'shield_slam', 'reckless_charge'}
         # self.strength = self.strength + 1
         # self.intelligence = self.intelligence -2
