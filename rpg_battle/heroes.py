@@ -7,9 +7,9 @@ class Hero(object):
         # self.strength = 6 * level + str_modifier
         for k,v in Hero.modifiers.items():
             if v > 0:
-                setattr(self, k, ((base + v) + (level -1) * (v +1)))
+                setattr(self, k, ((base + self.modifiers[k]) + (level -1) * (self.modifiers[k] +1)))
             else:
-                setattr(self, k, ((base + v) + (level -1)))
+                setattr(self, k, ((base + self.modifiers[k]) + (level -1)))
         # self.strength =
         # self.constitution = (base + cons_modifier) + (level -1) * (cons_modifier +1)
         # self.intelligence = (base + int_modifier) + (level -1) * (int_modifier +1)
@@ -106,10 +106,8 @@ class Warrior(Hero):
     constitution +2
     speed -1
     """
-
-    def __init__(self, level = 1):
-        super().__init__(str_modifier = 1, cons_modifier= 2, int_modifier= -2, speed_modifier = -1, level = level)
-        self.abilities = {'fight', 'shield_slam', 'reckless_charge'}
+    modifiers = dict(strength=1, intelligence=-2, constitution=2, speed=-1)
+    abilities = {'fight', 'shield_slam', 'reckless_charge'}
         # self.strength = self.strength + 1
         # self.intelligence = self.intelligence -2
         # self.constitution = self.constitution + 2
