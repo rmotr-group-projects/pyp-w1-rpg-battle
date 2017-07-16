@@ -67,7 +67,7 @@ class Hero(object):
         """
         Reduce hp by damage taken.
         """
-        pass
+        self.hp = self.hp - damage
 
     def heal_damage(self, healing):
         """
