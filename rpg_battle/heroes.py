@@ -1,11 +1,11 @@
 from .exceptions import *
 
 class Hero(object):
+    modifiers = dict(strength=0, intelligence=0, constitution=0, speed=0)
 
-    def __init__(self, level=1,str_modifier=0,cons_modifier=0,int_modifier=0,speed_modifier=0, base=6):
+    def __init__(self, level=1, base=6):
         # self.strength = 6 * level + str_modifier
-        modifiers = dict(strength=str_modifier, intelligence=int_modifier, constitution=cons_modifier, speed=speed_modifier)
-        for k,v in modifiers.items():
+        for k,v in Hero.modifiers.items():
             if v > 0:
                 setattr(self, k, ((base + v) + (level -1) * (v +1)))
             else:
@@ -66,8 +66,10 @@ class Hero(object):
             self.xp = self.xp - self.xp_for_next_level()
             for stat in attributes:
                 setattr(self, stat, getattr(self, stat) + 1)
-        self.maxhp= int(self.maxhp + 0.5*self.constitution)
-        self.maxmp= int(self.maxmp + 0.5*self.intelligence)        
+        self.maxhp+=  int(0.5*self.constitution)
+        self.maxmp+= int(0.5*self.intelligence)
+        self.hp= self.maxhp
+        self.mp = self.maxmp
 
 
     def take_damage(self, damage):
@@ -104,6 +106,7 @@ class Warrior(Hero):
     constitution +2
     speed -1
     """
+
     def __init__(self, level = 1):
         super().__init__(str_modifier = 1, cons_modifier= 2, int_modifier= -2, speed_modifier = -1, level = level)
         self.abilities = {'fight', 'shield_slam', 'reckless_charge'}
