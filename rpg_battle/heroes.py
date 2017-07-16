@@ -73,7 +73,9 @@ class Hero(object):
         """
         Increase hp by healing but not exceeding maxhp
         """
-        pass
+        self.hp+= healing
+        if self.hp > self.maxhp:
+            self.hp = self.maxhp
 
     def is_dead(self):
         """
