@@ -6,13 +6,22 @@ class Hero(object):
         self.strength = 6 * level
         self.constitution = 6 * level
         self.intelligence = 6 * level
+        self.maxmp=int(50 + 0.5 * self.intelligence)
+        self.maxhp=int(100 + 0.5 * self.constitution)
         self.speed = 6 * level
-        self.maxhp = int(100 + 0.5 * self.constitution)
-        self.maxmp= int(50 + 0.5 * self.intelligence)
-        self.hp = int(self.maxhp)
-        self.mp = int(self.maxmp)
+        # self.hp = int(self.maxhp)
+        # self.mp = int(self.maxmp)
         self.level= level
         self.xp = 0
+
+    @property
+    def hp(self):
+        return self.maxhp
+    @property
+    def mp(self):
+        return self.maxmp
+
+
 
 
     def xp_for_next_level(self):
@@ -40,6 +49,8 @@ class Hero(object):
         attributes = ['strength', 'constitution', 'speed', 'intelligence', 'level']
         if self.xp >= self.xp_for_next_level():
             self.xp = self.xp - self.xp_for_next_level()
+            self.maxhp= int(self.maxhp + 0.5*self.constitution)
+            self.maxmp= int(self.maxmp + 0.5*self.intelligence)
             for stat in attributes:
                 setattr(self, stat, getattr(self, stat) + 1)
 
