@@ -5,20 +5,32 @@ class Hero(object):
 
     def __init__(self, level=1, base=6):
         # self.strength = 6 * level + str_modifier
-        for k,v in Hero.modifiers.items():
+
+        for k,v in self.modifiers.items():
             if v >= 0:
                 setattr(self, k, ((base + self.modifiers[k]) + (level -1) * (self.modifiers[k] +1)))
             else:
-                setattr(self, k, ((base + self.modifiers[k] + level -1)))
+                setattr(self, k, ((base + self.modifiers[k] + level-1)))
         # self.strength =
         # self.constitution = (base + cons_modifier) + (level -1) * (cons_modifier +1)
         # self.intelligence = (base + int_modifier) + (level -1) * (int_modifier +1)
-        self.maxmp=int(50 + 0.5 * self.intelligence)
-        self.maxhp=int(100 + 0.5 * self.constitution)
+
+
+        self.level= level
+        self.maxmp=50
+        self.maxhp=100
+        def recursion_hp(x):
+            if x <= 6:
+                return 0
+            else:
+                return int(0.5 *x) + int(recursion(x-3))
         # self.speed = (base + speed_modifier) + (level -1) * (speed_modifier +1)
+
+        self.maxhp+= recursion_hp(self.constitution)
+        # self.maxmp+= recursion(self.intelligence)
         self.hp = (self.maxhp)
         self.mp = (self.maxmp)
-        self.level= level
+
         self.xp = 0
 
     @property
@@ -34,6 +46,7 @@ class Hero(object):
     @mp.setter
     def mp(self, value):
         self._mp = value
+
 
 
 
