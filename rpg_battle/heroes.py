@@ -2,13 +2,13 @@ from .exceptions import *
 
 class Hero(object):
 
-    def __init__(self, level=1):
-        self.strength = 6 * level
-        self.constitution = 6 * level
-        self.intelligence = 6 * level
+    def __init__(self, level=1,str_modifier=0,cons_modifier=0,int_modifier=0,speed_modifier=0):
+        self.strength = 6 * level + str_modifier
+        self.constitution = 6 * level + cons_modifier
+        self.intelligence = 6 * level + int_modifier
         self.maxmp=int(50 + 0.5 * self.intelligence)
         self.maxhp=int(100 + 0.5 * self.constitution)
-        self.speed = 6 * level
+        self.speed = 6 * level + speed_modifier
         self.hp = int(self.maxhp)
         self.mp = int(self.maxmp)
         self.level= level
@@ -97,6 +97,20 @@ class Warrior(Hero):
     constitution +2
     speed -1
     """
+    def __init__(self):
+        super().__init__(str_modifier = 1, cons_modifier= 2, int_modifier= -2, speed_modifier = -1)
+        self.abilities = {'fight', 'shield_slam', 'reckless_charge'}
+        # self.strength = self.strength + 1
+        # self.intelligence = self.intelligence -2
+        # self.constitution = self.constitution + 2
+        # self.speed = self.speed - 1
+        # self.maxmp=int(50 + 0.5 * self.intelligence)
+        # self.maxhp=int(100 + 0.5 * self.constitution)
+        # self.hp = int(self.maxhp)
+        # self.mp = int(self.maxmp)
+
+
+
 
     def shield_slam(self, target):
         """
