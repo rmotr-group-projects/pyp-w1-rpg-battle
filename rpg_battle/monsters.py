@@ -6,45 +6,60 @@ class Monster(object):
         """
         Sets up stats and levels up the monster if necessary
         """
-        pass
+        self.level=level
+        self.strength=8+(level-1)
+        self.constitution=8+(level-1)
+        self.intelligence=8+(level-1)
+        self.speed=8+(level-1)
+        self.basehp=10
+        self.maxhp=self.basehp+((level-1)*(0.5*self.constitution))
+        self.hp=self.maxhp
 
     def xp(self):
         """
         Returns the xp value of monster if defeated.
         XP value formula: (average of stats) + (maxhp % 10)
         """
-        pass
+        return ((self.strength+self.constitution+self.intelligence+self.speed)/4+(self.maxhp%10))
 
     def fight(self, target):
         """
         Attacks target dealing damage equal to strength
         """
-        pass
-
+        target.hp-=self.strength
+        
 
     def take_damage(self, damage):
         """
         Reduce hp by damage taken.
         """
-        pass
+        self.hp -= damage
+        if self.hp <0:
+            self.hp=0
 
     def heal_damage(self, healing):
         """
         Increase hp by healing but not exceeding maxhp
         """
-        pass
+        self.hp+= healing
+        if self.hp > self.maxhp:
+            self.hp = self.maxhp
+
 
     def is_dead(self):
         """
         Returns True if out of hp
         """
-        pass
+        if self.hp == 0:
+            return True
+        else:
+            return False
 
     def attack(self, target):
         """
         Attacks target using next ability in command queue
         """
-        pass
+        commandQueue=['fight', 'bash', 'slash']
 
 
 class Dragon(Monster):
@@ -54,11 +69,12 @@ class Dragon(Monster):
     special feature: Reduce all damage taken by 5
     """
 
+
     def tail_swipe(self, target):
         """
         damage: strength + speed
         """
-        pass
+        damage= self.strength + self.speed
 
 
 class RedDragon(Dragon):
@@ -72,8 +88,7 @@ class RedDragon(Dragon):
         """
         damage: intelligence * 2.5
         """
-        pass
-
+        damage= self.intelligence * 2.5
 
 class GreenDragon(Dragon):
     """
@@ -81,6 +96,7 @@ class GreenDragon(Dragon):
     speed multiplier: 1.5
     command queue: poison_breath, tail_swipe, fight
     """
+
 
     def poison_breath(self, target):
         """
@@ -147,6 +163,7 @@ class Troll(Humanoid):
     strength multiplier: 1.75
     constitution multiplier: 1.5
     base hp: 20
+    ['slash', 'fight', 'regenerate']    
     """
 
     def regenerate(self, *args):
@@ -158,8 +175,10 @@ class Troll(Humanoid):
 
 class Orc(Humanoid):
     """
+
     strength multiplier: 1.75
     base hp: 16
+    ['blood_rage', 'slash', 'fight']
     """
 
     def blood_rage(self, target):
