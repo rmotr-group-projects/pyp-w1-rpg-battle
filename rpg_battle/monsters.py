@@ -3,6 +3,8 @@ from .exceptions import *
 class Monster(object):
     multipliers = dict(strength=1, intelligence=1, constitution=1, speed=1)
     basehp=10
+    damage_reduction = 0
+
     def __init__(self, level=1, base =8):
         """
         Sets up stats and levels up the monster if necessary
@@ -50,8 +52,10 @@ class Monster(object):
         """
         Reduce hp by damage taken.
         """
-        if damage > 5:
-            self.hp-= self.hp - damage - 5
+        total_damage = damage - self.damage_reduction
+        if total_damage >0:
+            self.hp-= total_damage
+
 
 
     def heal_damage(self, healing):
@@ -67,7 +71,7 @@ class Monster(object):
         """
         Returns True if out of hp
         """
-        if self.hp == 0:
+        if self.hp <= 0:
             return True
         else:
             return False
@@ -87,6 +91,7 @@ class Dragon(Monster):
     """
     multipliers = dict(strength=1, intelligence=1, constitution=2, speed=1)
     basehp= 100
+    damage_reduction = 5
     def __init__(self, level=0):
         super().__init__()
         self.maxhp=100
@@ -146,15 +151,21 @@ class Undead(Monster):
     constitution multiplier: 0.25
     special feature: undead take damage from healing except their own healing abilities
     """
-    constitution=8*0.25
+    multipliers = dict(strength=1, intelligence=1, constitution=0.25, speed=1)
 
     def life_drain(self, target):
         """
         damage: intelligence * 1.5
         heals unit for damage done
         """
-        damage=self.intelligence*1.5
-        self.hp+=1
+        damage = self.intelligence * 1.5
+        target.hp-= damage
+        self.hp += damage
+        if self.hp >= self.maxhp:
+            self.hp=self.maxhp
+    def heal_damage(self, healing):
+        self.hp-=healing
+
 
 
 class Vampire(Undead):
@@ -163,8 +174,8 @@ class Vampire(Undead):
     intelligence multiplier: 2
     command queue: fight, bite, life_drain
     """
+    multipliers = dict(strength=1, intelligence=2, constitution=0.25, speed=1)
     basehp=30
-    intelligence=8*2
     commandQueue=['fight', 'bite','life_drain']
 
     def bite(self, target):
@@ -173,9 +184,12 @@ class Vampire(Undead):
         also reduces target's maxhp by amount equal to damage done
         heals unit for damage done
         """
-        damage=speed*0.5
+        damage=self.speed*0.5
         target.maxhp-=damage
-        self.hp+=1
+        target.hp= target.maxhp
+        self.hp+=damage
+        if self.hp >= self.maxhp:
+            self.hp=self.maxhp
 
 
 class Skeleton(Undead):
@@ -185,16 +199,15 @@ class Skeleton(Undead):
     intelligence multiplier: 0.25
     command queue: bash, fight, life_drain
     """
-    strength=8*1.25
-    speed=8*0.5
-    intelligence=8*0.25
+    multipliers = dict(strength=1.25, intelligence=0.25, constitution=0.25, speed=0.5)
+
     commandQueue=['bash', 'fight', 'life_drain']
 
     def bash(self, target):
         """
         damage: strength * 2
         """
-        damage=self.strength*2
+        target.hp-=self.strength*2
 
 
 class Humanoid(Monster):
@@ -206,15 +219,15 @@ class Humanoid(Monster):
 
 
 class Troll(Humanoid):
+    multipliers = dict(strength=1.75, intelligence=1, constitution=1.5, speed=1)
+    basehp= 20
     """
     strength multiplier: 1.75
     constitution multiplier: 1.5
     base hp: 20
     ['slash', 'fight', 'regenerate']
     """
-    strength=8*1.75
-    constitution=8*1.5
-    basehp=20
+
     commandQueue=['slash', 'fight', 'regenerate']
 
     def regenerate(self, *args):
@@ -230,7 +243,8 @@ class Orc(Humanoid):
     base hp: 16
     ['blood_rage', 'slash', 'fight']
     """
-    strength=8*1.75
+    multipliers = dict(strength=1.75, intelligence=1, constitution=1, speed=1)
+
     basehp=16
     commandQueue=['blood_rage', 'slash', 'fight']
 
@@ -240,4 +254,4 @@ class Orc(Humanoid):
         damage: strength * 2
         """
         self.hp-=self.constitution*0.5
-        damage=self.strength*2
+        target.hp=self.strength*2
