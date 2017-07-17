@@ -50,9 +50,9 @@ class Monster(object):
         """
         Reduce hp by damage taken.
         """
-        self.hp -= damage
-        if self.hp <0:
-            self.hp=0
+        if damage > 5:
+            self.hp-= self.hp - damage - 5
+
 
     def heal_damage(self, healing):
         """
@@ -138,7 +138,7 @@ class GreenDragon(Dragon):
         """
         damage: (intelligence + constitution) * 1.5
         """
-        damage= (self.intelligence + self.constitution) * 1.5
+        target.hp -= (self.intelligence + self.constitution) * 1.5
 
 
 class Undead(Monster):
