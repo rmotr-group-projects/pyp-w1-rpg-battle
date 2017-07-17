@@ -183,7 +183,12 @@ class Mage(Hero):
         cost: 8 mp
         damage: 6 + (0.5 * intelligence)
         """
-        pass
+        if self.mp >= 8:
+            self.mp-= 8
+            target.hp-= 6 + int(0.5 * self.intelligence)
+        else:
+            raise InsufficientMP    
+
 
     def frostbolt(self, target):
         """
