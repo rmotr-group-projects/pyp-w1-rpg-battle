@@ -85,11 +85,8 @@ class Dragon(Monster):
     constitution multiplier: 2
     special feature: Reduce all damage taken by 5
     """
-    thisDragon=Monster()
-    thisDragon.constitution*=2
-    thisDragon.basehp=100
-    damage=-5
-
+    multipliers = dict(strength=1, intelligence=1, constitution=2, speed=1)
+    
     def tail_swipe(self, target):
         """
         damage: strength + speed
