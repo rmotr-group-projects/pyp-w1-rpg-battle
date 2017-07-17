@@ -175,6 +175,8 @@ class Mage(Hero):
     inteligence +3
     constitution -2
     """
+    modifiers = dict(strength=-2, intelligence=3, constitution=-2, speed=0)
+    abilities = {'fight', 'fireball', 'frostbolt'}
 
     def fireball(self, target):
         """
