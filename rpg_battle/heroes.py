@@ -17,16 +17,16 @@ class Hero(object):
 
 
         self.level= level
-        self.maxmp=50
-        self.maxhp=100
-        def recursion_hp(x):
-            if x <= 6:
-                return 0
-            else:
-                return int(0.5 *x) + int(recursion(x-3))
+        self.maxmp=50 + int(0.5 * self.intelligence)
+        self.maxhp=100 + int(0.5 * self.constitution)
+        # def recursion_hp(x):
+        #     if x <= 6:
+        #         return 0
+        #     else:
+        #         return int(0.5 *x) + int(recursion(x-3))
         # self.speed = (base + speed_modifier) + (level -1) * (speed_modifier +1)
 
-        self.maxhp+= recursion_hp(self.constitution)
+        # self.maxhp+= recursion_hp(self.constitution)
         # self.maxmp+= recursion(self.intelligence)
         self.hp = (self.maxhp)
         self.mp = (self.maxmp)
@@ -77,12 +77,23 @@ class Hero(object):
         attributes = ['strength', 'constitution', 'speed', 'intelligence', 'level']
         if self.xp >= self.xp_for_next_level():
             self.xp = self.xp - self.xp_for_next_level()
-            for stat in attributes:
-                setattr(self, stat, getattr(self, stat) + 1)
+            self.level_up()
+        #     for stat in attributes:
+        #         setattr(self, stat, getattr(self, stat) + 1)
+        # self.maxhp+=  int(0.5*self.constitution)
+        # self.maxmp+= int(0.5*self.intelligence)
+        # self.hp= self.maxhp
+        # self.mp = self.maxmp
+
+    def level_up(self):
+        for k,v in self.modifiers.items():
+            setattr(self, k, getattr(self, k) + 1 + (self.modifiers[k] if self.modifiers[k] > 0 else 0))
         self.maxhp+=  int(0.5*self.constitution)
         self.maxmp+= int(0.5*self.intelligence)
         self.hp= self.maxhp
         self.mp = self.maxmp
+        self.level +=1
+
 
 
     def take_damage(self, damage):
