@@ -2,7 +2,7 @@ from .exceptions import *
 
 class Monster(object):
     multipliers = dict(strength=1, intelligence=1, constitution=1, speed=1)
-
+    basehp=10
     def __init__(self, level=1, base =8):
         """
         Sets up stats and levels up the monster if necessary
@@ -25,7 +25,7 @@ class Monster(object):
             # setattr(self, k, getattr(self, k) + 1 + (self.modifiers[k] if self.modifiers[k] > 0 else 0))
             setattr(self, k, int(8 * v + (self.level) * v))
         self.level +=1
-        self.maxhp=10 + (self.level - 1) * (0.5 * self.constitution)
+        self.maxhp=self.basehp + (self.level - 1) * (0.5 * self.constitution)
         self.hp= self.maxhp
 
 
@@ -86,11 +86,13 @@ class Dragon(Monster):
     special feature: Reduce all damage taken by 5
     """
     multipliers = dict(strength=1, intelligence=1, constitution=2, speed=1)
-
-    def __init__(self):
+    basehp= 100
+    def __init__(self, level=0):
         super().__init__()
         self.maxhp=100
         self.hp=self.maxhp
+        for n in range(level-1):
+            super().level_up()
 
     def tail_swipe(self, target):
         """
