@@ -8,17 +8,18 @@ class Hero(object):
 
         for k,v in self.modifiers.items():
             if v >= 0:
-                setattr(self, k, ((base + self.modifiers[k]) + (level -1) * (self.modifiers[k] +1)))
+                # setattr(self, k, ((base + self.modifiers[k]) + (level -1) * (self.modifiers[k] +1)))
+                setattr(self, k, base-1)
             else:
-                setattr(self, k, ((base + self.modifiers[k] + level-1)))
+                setattr(self, k, ((base + self.modifiers[k] -1)))
         # self.strength =
         # self.constitution = (base + cons_modifier) + (level -1) * (cons_modifier +1)
         # self.intelligence = (base + int_modifier) + (level -1) * (int_modifier +1)
 
 
-        self.level= level
-        self.maxmp=50 + int(0.5 * self.intelligence)
-        self.maxhp=100 + int(0.5 * self.constitution)
+        self.level= 0
+        self.maxmp=50
+        self.maxhp=100
         # def recursion_hp(x):
         #     if x <= 6:
         #         return 0
@@ -32,6 +33,8 @@ class Hero(object):
         self.mp = (self.maxmp)
 
         self.xp = 0
+        for n in range(level):
+            self.level_up()
 
     @property
     def hp(self):
@@ -47,7 +50,14 @@ class Hero(object):
     def mp(self, value):
         self._mp = value
 
-
+    def level_up(self):
+        for k,v in self.modifiers.items():
+            setattr(self, k, getattr(self, k) + 1 + (self.modifiers[k] if self.modifiers[k] > 0 else 0))
+        self.maxhp+=  int(0.5*self.constitution)
+        self.maxmp+= int(0.5*self.intelligence)
+        self.hp= self.maxhp
+        self.mp = self.maxmp
+        self.level +=1
 
 
 
@@ -85,14 +95,6 @@ class Hero(object):
         # self.hp= self.maxhp
         # self.mp = self.maxmp
 
-    def level_up(self):
-        for k,v in self.modifiers.items():
-            setattr(self, k, getattr(self, k) + 1 + (self.modifiers[k] if self.modifiers[k] > 0 else 0))
-        self.maxhp+=  int(0.5*self.constitution)
-        self.maxmp+= int(0.5*self.intelligence)
-        self.hp= self.maxhp
-        self.mp = self.maxmp
-        self.level +=1
 
 
 
