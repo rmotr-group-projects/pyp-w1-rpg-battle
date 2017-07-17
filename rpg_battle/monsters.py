@@ -119,7 +119,7 @@ class RedDragon(Dragon):
         """
         damage: intelligence * 2.5
         """
-        damage= self.intelligence * 2.5
+        target.hp -= self.intelligence * 2.5
 
 class GreenDragon(Dragon):
     """
@@ -127,9 +127,10 @@ class GreenDragon(Dragon):
     speed multiplier: 1.5
     command queue: poison_breath, tail_swipe, fight
     """
-    greenDragon=Dragon()
-    greenDragon.strength*=1.5
-    greenDragon.speed*=1.5
+    multipliers = dict(strength=1.5, intelligence=1, constitution=2, speed=1.5)
+    # greenDragon=Dragon()
+    # greenDragon.strength*=1.5
+    # greenDragon.speed*=1.5
     commandQueue=['poison_breath','tail_swipe','fight']
 
 
