@@ -16,7 +16,7 @@ class Hero(object):
         self.hp = 103
         self.mp = 53
         self.xp = 0
-
+        self.abilities = ['fight']
 
 
     def xp_for_next_level(self):
@@ -31,10 +31,10 @@ class Hero(object):
         """
         Attacks target, dealing damage equal to the user's strength.
         """
-        self.dummy = target
-        target.hp = target.maxhp - self.strength
-        return target.hp
-
+        # self.dummy = target
+        # target.hp = target.maxhp - self.strength
+        # return target.hp
+        target.take_damage(self.strength)
 
     def gain_xp(self, xp):
         """
@@ -43,9 +43,9 @@ class Hero(object):
         enough xp to increase its total to 12 xp it would level up and
         then have an xp total of 2.
         """
-        while (self.xp + xp) >= (self.xp_for_next_level()):
+        while self.xp >= (self.xp_for_next_level()):
             self.level += 1
-            self.xp = self.xp + xp - self.xp_for_next_level()
+            self.xp -= self.xp_for_next_level()
             self.strength += 1
             self.constitution += 1
             self.intelligence += 1
@@ -62,7 +62,7 @@ class Hero(object):
         """
         Reduce hp by damage taken.
         """
-        self.hp = self.hp - damage
+        self.hp -= damage
         if self.hp <= 0:
           return self.is_dead()
 
@@ -70,8 +70,8 @@ class Hero(object):
         """
         Increase hp by healing but not exceeding maxhp
         """
-        self.hp = self.hp + healing
-        if self.hp + healing >= self.maxhp:
+        self.hp += healing
+        if self.hp >= self.maxhp:
             self.hp = self.maxhp
 
     def is_dead(self):
@@ -102,7 +102,26 @@ class Warrior(Hero):
         self.maxmp = 52
         self.hp = 104
         self.mp = 52
-        self.abilities = {'fight', 'shield_slam', 'reckless_charge'}
+        self.xp = 0
+        self.abilities.append('shield_slam')
+        self.abilities.append('reckless_charge')
+
+    def level_up(self):
+        super(Warrior, self).level_up()
+        while self.xp >= (self.level * 10):
+            self.level += 1
+            self.xp -= (self.level * 10)
+            self.strength += 2
+            self.constitution += 3
+            self.intelligence += 1
+            self.speed += 1
+            self.maxhp += int(self.constitution/2)
+            self.maxmp += int(self.intelligence/2)
+            self.hp = self.maxhp
+            self.mp = self.maxmp
+        else:
+            self.xp += xp
+
 
     def shield_slam(self, target):
         """
@@ -144,7 +163,7 @@ class Mage(Hero):
         self.maxmp = 54
         self.hp = 102
         self.mp = 54
-        self.abilities = {'fight', 'fireball', 'frostbolt'}
+        self.abilities = ['fight', 'fireball', 'frostbolt']
 
 
     def fireball(self, target):
@@ -187,7 +206,7 @@ class Cleric(Hero):
         self.maxmp = 53
         self.hp = 103
         self.mp = 53
-        self.abilities = {'fight', 'heal', 'smite'}
+        self.abilities = ['fight', 'heal', 'smite']
 
     def heal(self, target):
         """
@@ -229,7 +248,7 @@ class Rogue(Hero):
         self.maxmp = 52
         self.hp = 102
         self.mp = 52
-        self.abilities = {'fight', 'backstab', 'rapid_strike'}
+        self.abilities = ['fight', 'backstab', 'rapid_strike']
 
     def backstab(self, target):
         """

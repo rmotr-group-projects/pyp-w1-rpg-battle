@@ -8,13 +8,13 @@ class Battle(object):
         """
         determines initiative order using unit speed
         """
-        pass
+        self.participants = [Warrior(), Orc(), GreenDragon(), Mage(), Rogue(), RedDragon(), Cleric(), Vampire(), Skeleton(), Troll()].sort(self.speed)
 
     def current_attacker(self):
         """
         returns unit at front of initiative queue
         """
-        pass
+
 
     def start(self):
         pass
