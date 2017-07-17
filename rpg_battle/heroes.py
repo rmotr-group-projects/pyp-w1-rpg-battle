@@ -209,20 +209,31 @@ class Cleric(Hero):
     speed -1
     constitution +1
     """
+    modifiers = dict(strength=0, intelligence=0, constitution=1, speed=-1)
+    abilities = {'fight', 'heal', 'smite'}
 
     def heal(self, target):
         """
         cost: 4 mp
         healing: constitution
         """
-        pass
+        if self.mp >=4:
+            self.mp-=4
+            self.hp += self.constitution
+        else:
+            raise InsufficientMP
+
 
     def smite(self, target):
         """
         cost: 7 mp
         damage: 4 + (0.5 * (intelligence + constitution))
         """
-        pass
+        if self.mp >=7:
+            self.mp-=7
+            target.hp-= 4 +int(0.5 *(self.intelligence + self.constitution))
+        else:
+            raise InsufficientMP
 
 class Rogue(Hero):
     """
@@ -232,6 +243,9 @@ class Rogue(Hero):
     intelligence -1
     constitution -2
     """
+    modifiers = dict(strength=1, intelligence=-1, constitution=-2, speed=2)
+    abilities = {'fight', 'backstab', 'rapid_strike'}
+
 
     def backstab(self, target):
         """
@@ -239,11 +253,18 @@ class Rogue(Hero):
         restriction: target must be undamaged, else raise InvalidTarget
         damage: 2 * strength
         """
-        pass
+        if target.hp == target.maxhp:
+            target.hp-= 2 * self.strength
+        else:
+            raise InvalidTarget
 
     def rapid_strike(self, target):
         """
         cost: 5 mp
         damage: 4 + speed
         """
-        pass
+        if self.mp >=5:
+            target.hp-=4 + self.speed
+            self.mp-=5
+        else:
+            raise InsufficientMP    
