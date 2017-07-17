@@ -98,7 +98,7 @@ class Dragon(Monster):
         """
         damage: strength + speed
         """
-        damage= self.strength + self.speed
+        target.hp-=self.strength + self.speed
 
 
 class RedDragon(Dragon):
