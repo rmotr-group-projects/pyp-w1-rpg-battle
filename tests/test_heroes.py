@@ -210,7 +210,7 @@ class MageTestCase(unittest.TestCase):
         self.assertEqual(self.hero.mp, self.hero.maxmp - 3)
         self.assertEqual(self.dummy.hp, self.dummy.maxhp - 4)
 
-    def test_frostbot_insufficient_mp(self):
+    def test_frostbolt_insufficient_mp(self):
         self.hero.mp = 0
         with self.assertRaises(InsufficientMP):
             self.hero.frostbolt(self.dummy)

@@ -187,7 +187,7 @@ class Mage(Hero):
             self.mp-= 8
             target.hp-= 6 + int(0.5 * self.intelligence)
         else:
-            raise InsufficientMP    
+            raise InsufficientMP
 
 
     def frostbolt(self, target):
@@ -195,7 +195,13 @@ class Mage(Hero):
         cost: 3 mp
         damage: 3 + level
         """
-        pass
+        if self.mp >= 3:
+            self.mp-= 3
+            target.hp-= 3 + self.level
+        else:
+            raise InsufficientMP
+
+
 
 class Cleric(Hero):
     """
