@@ -86,7 +86,12 @@ class Dragon(Monster):
     special feature: Reduce all damage taken by 5
     """
     multipliers = dict(strength=1, intelligence=1, constitution=2, speed=1)
-    
+
+    def __init__(self):
+        super().__init__()
+        self.maxhp=100
+        self.hp=self.maxhp
+
     def tail_swipe(self, target):
         """
         damage: strength + speed
@@ -100,9 +105,11 @@ class RedDragon(Dragon):
     intelligence multiplier: 1.5
     command queue: fire_breath, tail_swipe, fight
     """
-    redDragon=Dragon()
-    redDragon.strength*=2
-    redDragon.intelligence*=1.5
+    multipliers = dict(strength=2, intelligence=1.5, constitution=2, speed=1)
+
+    # redDragon=Dragon()
+    # redDragon.strength*=2
+    # redDragon.intelligence*=1.5
     commandQueue=['fire_breath', 'tail_swipe', 'fight']
 
 
