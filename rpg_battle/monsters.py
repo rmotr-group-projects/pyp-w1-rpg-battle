@@ -14,8 +14,7 @@ class Monster(object):
         # self.constitution=8+(level-1)
         # self.intelligence=8+(level-1)
         # self.speed=8+(level-1)
-        self.basehp=10
-        self.maxhp=self.basehp+((level-1)*(0.5*self.constitution))
+        self.maxhp=10
         self.hp=self.maxhp
         for n in range(level):
             self.level_up()
@@ -25,9 +24,10 @@ class Monster(object):
         for k,v in self.multipliers.items():
             # setattr(self, k, getattr(self, k) + 1 + (self.modifiers[k] if self.modifiers[k] > 0 else 0))
             setattr(self, k, int(8 * v + (self.level) * v))
-        self.maxhp+=  0
-        self.hp= self.maxhp
         self.level +=1
+        self.maxhp=10 + (self.level - 1) * (0.5 * self.constitution)
+        self.hp= self.maxhp
+
 
 
 
