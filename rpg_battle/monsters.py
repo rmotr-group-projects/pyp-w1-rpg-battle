@@ -215,7 +215,7 @@ class Humanoid(Monster):
         """
         damage: strength + speed
         """
-        damage=self.strength+speed
+        target.hp -=self.strength + self.speed
 
 
 class Troll(Humanoid):
@@ -254,4 +254,4 @@ class Orc(Humanoid):
         damage: strength * 2
         """
         self.hp-=self.constitution*0.5
-        target.hp=self.strength*2
+        target.hp-=self.strength*2
