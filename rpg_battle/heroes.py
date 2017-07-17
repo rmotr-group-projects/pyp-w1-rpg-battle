@@ -151,7 +151,12 @@ class Warrior(Hero):
         cost: 5 mp
         damage: 1.5 * strength
         """
-        pass
+        if self.mp <=5:
+            raise InsufficientMP
+        else:
+            print (self.maxhp)
+            self.mp -= 5
+            target.hp -= int(1.5 * self.strength)
 
     def reckless_charge(self, target):
         """
