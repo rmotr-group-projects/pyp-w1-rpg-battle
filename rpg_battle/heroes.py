@@ -163,7 +163,10 @@ class Warrior(Hero):
         cost: 4 hp
         damage: 1.5 * strength
         """
-        pass
+        self.hp -=4
+
+        target.hp -= int(2.0 * self.strength)
+        print(1.5*self.strength, self.level)
 
 class Mage(Hero):
     """
