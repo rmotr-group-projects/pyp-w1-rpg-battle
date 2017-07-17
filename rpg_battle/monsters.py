@@ -1,19 +1,36 @@
 from .exceptions import *
 
 class Monster(object):
+    multipliers = dict(strength=1, intelligence=1, constitution=1, speed=1)
 
-    def __init__(self, level=1):
+    def __init__(self, level=1, base =8):
         """
         Sets up stats and levels up the monster if necessary
         """
-        self.level=level
-        self.strength=8+(level-1)
-        self.constitution=8+(level-1)
-        self.intelligence=8+(level-1)
-        self.speed=8+(level-1)
+        for k,v in self.multipliers.items():
+            setattr(self, k, base*v)
+        self.level=0
+        # self.strength=8+(level-1)
+        # self.constitution=8+(level-1)
+        # self.intelligence=8+(level-1)
+        # self.speed=8+(level-1)
         self.basehp=10
         self.maxhp=self.basehp+((level-1)*(0.5*self.constitution))
         self.hp=self.maxhp
+        for n in range(level):
+            self.level_up()
+
+
+    def level_up(self):
+        for k,v in self.multipliers.items():
+            # setattr(self, k, getattr(self, k) + 1 + (self.modifiers[k] if self.modifiers[k] > 0 else 0))
+            setattr(self, k, int(8 * v + (self.level) * v))
+        self.maxhp+=  0
+        self.hp= self.maxhp
+        self.level +=1
+
+
+
 
     def xp(self):
         """
@@ -27,7 +44,7 @@ class Monster(object):
         Attacks target dealing damage equal to strength
         """
         target.hp-=self.strength
-        
+
 
     def take_damage(self, damage):
         """
@@ -72,7 +89,6 @@ class Dragon(Monster):
     thisDragon.constitution*=2
     thisDragon.basehp=100
     damage=-5
-
 
     def tail_swipe(self, target):
         """
@@ -187,7 +203,7 @@ class Troll(Humanoid):
     strength multiplier: 1.75
     constitution multiplier: 1.5
     base hp: 20
-    ['slash', 'fight', 'regenerate']    
+    ['slash', 'fight', 'regenerate']
     """
     strength=8*1.75
     constitution=8*1.5
