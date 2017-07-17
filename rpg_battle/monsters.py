@@ -68,6 +68,10 @@ class Dragon(Monster):
     constitution multiplier: 2
     special feature: Reduce all damage taken by 5
     """
+    thisDragon=Monster()
+    thisDragon.constitution*=2
+    thisDragon.basehp=100
+    damage=-5
 
 
     def tail_swipe(self, target):
@@ -83,6 +87,11 @@ class RedDragon(Dragon):
     intelligence multiplier: 1.5
     command queue: fire_breath, tail_swipe, fight
     """
+    redDragon=Dragon()
+    redDragon.strength*=2
+    redDragon.intelligence*=1.5
+    commandQueue=['fire_breath', 'tail_swipe', 'fight']
+
 
     def fire_breath(self, target):
         """
@@ -96,13 +105,17 @@ class GreenDragon(Dragon):
     speed multiplier: 1.5
     command queue: poison_breath, tail_swipe, fight
     """
+    greenDragon=Dragon()
+    greenDragon.strength*=1.5
+    greenDragon.speed*=1.5
+    commandQueue=['poison_breath','tail_swipe','fight']
 
 
     def poison_breath(self, target):
         """
         damage: (intelligence + constitution) * 1.5
         """
-        pass
+        damage= (self.intelligence + self.constitution) * 1.5
 
 
 class Undead(Monster):
@@ -110,13 +123,15 @@ class Undead(Monster):
     constitution multiplier: 0.25
     special feature: undead take damage from healing except their own healing abilities
     """
+    constitution=8*0.25
 
     def life_drain(self, target):
         """
         damage: intelligence * 1.5
         heals unit for damage done
         """
-        pass
+        damage=self.intelligence*1.5
+        self.hp+=1
 
 
 class Vampire(Undead):
@@ -125,6 +140,9 @@ class Vampire(Undead):
     intelligence multiplier: 2
     command queue: fight, bite, life_drain
     """
+    basehp=30
+    intelligence=8*2
+    commandQueue=['fight', 'bite','life_drain']
 
     def bite(self, target):
         """
@@ -132,7 +150,9 @@ class Vampire(Undead):
         also reduces target's maxhp by amount equal to damage done
         heals unit for damage done
         """
-        pass
+        damage=speed*0.5
+        target.maxhp-=damage
+        self.hp+=1
 
 
 class Skeleton(Undead):
@@ -142,12 +162,16 @@ class Skeleton(Undead):
     intelligence multiplier: 0.25
     command queue: bash, fight, life_drain
     """
+    strength=8*1.25
+    speed=8*0.5
+    intelligence=8*0.25
+    commandQueue=['bash', 'fight', 'life_drain']
 
     def bash(self, target):
         """
         damage: strength * 2
         """
-        pass
+        damage=self.strength*2
 
 
 class Humanoid(Monster):
@@ -155,7 +179,7 @@ class Humanoid(Monster):
         """
         damage: strength + speed
         """
-        pass
+        damage=self.strength+speed
 
 
 class Troll(Humanoid):
@@ -165,6 +189,10 @@ class Troll(Humanoid):
     base hp: 20
     ['slash', 'fight', 'regenerate']    
     """
+    strength=8*1.75
+    constitution=8*1.5
+    basehp=20
+    commandQueue=['slash', 'fight', 'regenerate']
 
     def regenerate(self, *args):
         """
@@ -175,15 +203,18 @@ class Troll(Humanoid):
 
 class Orc(Humanoid):
     """
-
     strength multiplier: 1.75
     base hp: 16
     ['blood_rage', 'slash', 'fight']
     """
+    strength=8*1.75
+    basehp=16
+    commandQueue=['blood_rage', 'slash', 'fight']
 
     def blood_rage(self, target):
         """
         cost: constitution * 0.5 hp
         damage: strength * 2
         """
-        pass
+        self.hp-=self.constitution*0.5
+        damage=self.strength*2
