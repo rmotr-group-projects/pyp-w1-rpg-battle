@@ -3,7 +3,7 @@ import unittest
 from rpg_battle import heroes
 from rpg_battle import monsters
 from rpg_battle.battle import Battle
-from rpg_battle.exceptions import *
+from rpg_battle.exceptions import InsufficientMP, InvalidTarget, InvalidCommand, Defeat, Victory
 
 class BattleTestCase(unittest.TestCase):
     def test_participants(self):
@@ -21,7 +21,9 @@ class BattleTestCase(unittest.TestCase):
                         monsters.Orc(),
                         monsters.GreenDragon()]
         battle = Battle(participants)
+        
         self.assertTrue(isinstance(battle.current_attacker(), monsters.GreenDragon))
+        
 
 # initiatve order: GreenDragon, Orc, Mage, Warrior
 
@@ -38,6 +40,7 @@ class BattleTestCase(unittest.TestCase):
                            ('Orc takes', 'self-inflicted damage!'),
                            ("Mage's turn!",)]
         output = battle.start().splitlines()
+        # assert False, battle.order
         for line, expected in zip(output, expected_output):
             for item in expected:
                 self.assertIn(item, line)
