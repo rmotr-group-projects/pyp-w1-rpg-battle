@@ -188,8 +188,11 @@ Rogue
 ----------
 
 > **Stats**
-> Monsters start with a base stat level of 8 versus the 6 that heroes receive. Instead of receiving stat modifiers like heroes, monsters may receive stat multiplier instead. These are applied in the following manner: At level 1 a stat is set to 8x the stat multiplier. For levelled monsters set the stat to 8X multiplier + `(level - 1`)x multiplier, dropping fractions.
-> Monster have a base HP of 10 (this may be overidden by monster families and subtypes, more on this later) to calculate their actual `maxhp` use the base hp + (level - 1) x (0.5x `constitution`), dropping fractions as usual.
+> Monsters start with a base stat level of 8 versus the 6 that heroes receive. Instead of receiving stat modifiers like heroes, 
+monsters may receive stat multiplier instead. These are applied in the following manner: At level 1 a stat is set to 8x the stat multiplier. 
+For levelled monsters set the stat to 8X multiplier + `(level - 1`)x multiplier, dropping fractions.
+> Monster have a base HP of 10 (this may be overidden by monster families and subtypes, more on this later) to calculate their actual `maxhp` 
+use the base hp + (level - 1) x (0.5x `constitution`), dropping fractions as usual.
 > 
 
 
@@ -282,7 +285,9 @@ Monsters are divided into families before being separated into individual monste
 
 **Battle System**
 ==============
-Preparing a battle should be as simple as creating a new `Battle` while passing in a list of participants. The battle should handle sorting the participants in order of `speed` and then cycle through the list, moving units to the end of the line as they take turns performing actions.
+Preparing a battle should be as simple as creating a new `Battle` while passing in a list of participants. 
+The battle should handle sorting the participants in order of `speed` and then cycle through the list, 
+moving units to the end of the line as they take turns performing actions.
 
 A Battle should have the following outward facing interface:
 
@@ -290,7 +295,16 @@ A Battle should have the following outward facing interface:
 - `current_attacker()`: returns the unit at the front of the initiative queue
 - `execute_command(command, target)`: uses an ability on the target
 
-Upon running the `start` command the program should check to see if the current attacker is a monster, if it is it will pick a hero target at random and use the monster's next attack in its command queue. It will then repeat the process until it reaches a hero's turn. At this point it returns a multi-line string containing all the events that have happened so far and stating what hero's turn it is. (Details on event formatting below.) It is then up to the user to select a target and action and then `execute_command`. This will run the corresponding command (throwing any appropriate errors, including `InvalidCommand` if the command doesn't exist) and then resume the cycle of moving through the initiative queue until it reaches a Hero again. At the end of each unit's turn all dead units should be removed from the initiative queue and xp should be rewarded to all heroes for any monsters killed, triggering level ups if appropriate. If at any time all the monsters are wiped out the program should raise a Victory, if all the heroes are killed it should raise a Defeat.
+Upon running the `start` command the program should check to see if the current attacker is a monster, 
+if it is it will pick a hero target at random and use the monster's next attack in its command queue. 
+It will then repeat the process until it reaches a hero's turn. At this point it returns a multi-line 
+string containing all the events that have happened so far and stating what hero's turn it is. 
+(Details on event formatting below.) It is then up to the user to select a target and action and then `execute_command`. 
+This will run the corresponding command (throwing any appropriate errors, 
+including `InvalidCommand` if the command doesn't exist) and then resume the cycle of moving through the 
+initiative queue until it reaches a Hero again. At the end of each unit's turn all dead units should be removed 
+from the initiative queue and xp should be rewarded to all heroes for any monsters killed, triggering level ups if appropriate. 
+If at any time all the monsters are wiped out the program should raise a Victory, if all the heroes are killed it should raise a Defeat.
 
 > **Event formatting**
 > Each event should be recorded on a new line in the multi-line string that is returned
