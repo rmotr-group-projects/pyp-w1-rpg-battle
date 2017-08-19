@@ -7,6 +7,7 @@ class Hero(object):
                   'constitution': 6}
     BASE_HP = 100
     BASE_MP = 50
+
     
     def __init__(self, level=1):
         """
@@ -23,6 +24,7 @@ class Hero(object):
         self.xp = 0
         for l in range(level-1):
             self._level_up()
+
 
     def _level_up(self):
         modifiers = getattr(self, 'MODIFIERS', {})
@@ -120,6 +122,7 @@ class Warrior(Hero):
                  'speed': -1}
 
     abilities = ('fight', 'shield_slam', 'reckless_charge')
+
     
     def shield_slam(self, target):
         """
@@ -132,6 +135,7 @@ class Warrior(Hero):
         target.take_damage(damage)
         self.mp -= cost
         return self._attack_message(target, damage, 'shield slam')
+
 
     def reckless_charge(self, target):
         """
@@ -147,6 +151,7 @@ class Warrior(Hero):
                                                                                damage=health_cost))
         return message
 
+
 class Mage(Hero):
     """
     Stat modifiers
@@ -154,23 +159,27 @@ class Mage(Hero):
     inteligence +3
     constitution -2
     """
+
     MODIFIERS = {'strength': -2,
                  'intelligence': 3,
                  'constitution': -2}
 
     abilities = ('fight', 'fireball', 'frostbolt')
 
+
     def fireball(self, target):
         """
         cost: 8 mp
         damage: 6 + (0.5 * intelligence)
         """
+
         cost = 8
         self._has_enough_mp(cost)
         damage = 6 + int(self.intelligence * 0.5)
         target.take_damage(damage)
         self.mp -= cost
         return self._attack_message(target, damage, 'fireball')
+
 
     def frostbolt(self, target):
         """
@@ -184,6 +193,7 @@ class Mage(Hero):
         self.mp -= cost
         return self._attack_message(target, damage, 'frostbolt')
 
+
 class Cleric(Hero):
     """
     Stat modifiers:
@@ -194,6 +204,7 @@ class Cleric(Hero):
                  'constitution': 1}
 
     abilities = ('fight', 'heal', 'smite')
+
 
     def heal(self, target):
         """
@@ -209,6 +220,7 @@ class Cleric(Hero):
                                                                 target=type(target).__name__,
                                                                 healing=healing)]
 
+
     def smite(self, target):
         """
         cost: 7 mp
@@ -220,6 +232,7 @@ class Cleric(Hero):
         target.take_damage(damage)
         self.mp -= cost
         return self._attack_message(target, damage, 'smite')
+
 
 class Rogue(Hero):
     """
@@ -236,6 +249,7 @@ class Rogue(Hero):
 
     abilities = ('fight', 'backstab', 'rapid_strike')
 
+
     def backstab(self, target):
         """
         cost: None
@@ -248,6 +262,7 @@ class Rogue(Hero):
         target.take_damage(damage)
         return self._attack_message(target, damage, 'backstab')
 
+
     def rapid_strike(self, target):
         """
         cost: 5 mp
@@ -259,4 +274,5 @@ class Rogue(Hero):
         target.take_damage(damage)
         self.mp -= cost
         return self._attack_message(target, damage, 'rapid strike')
+
 

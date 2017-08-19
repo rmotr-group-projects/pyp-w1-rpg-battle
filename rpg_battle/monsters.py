@@ -9,6 +9,7 @@ class Monster(object):
              'speed': 12}
     BASE_HP = 10
     XP_MULTIPLIER = 1
+
     def __init__(self, level=1):
         """
         Sets up stats and levels up the monster if necessary
@@ -84,7 +85,6 @@ class Monster(object):
                                                                       damage=damage)]
 
 
-
 class Dragon(Monster):
     """
     base hp: 100
@@ -158,6 +158,7 @@ class GreenDragon(Dragon):
         return self._attack_message(target, damage, 'poison breath')
 
 
+
 class Undead(Monster):
     """
     constitution multiplier: 0.25
@@ -167,6 +168,7 @@ class Undead(Monster):
     # Undead take damage from healing
     def heal_damage(self, healing):
         self.take_damage(healing)
+
 
     def life_drain(self, target):
         """
@@ -180,6 +182,7 @@ class Undead(Monster):
         message.append('{monster} heals for {healing}!'.format(monster=type(self).__name__,
                                                                healing=damage))
         return message
+
 
 
 class Vampire(Undead):
@@ -212,6 +215,7 @@ class Vampire(Undead):
         return message
 
 
+
 class Skeleton(Undead):
     """
     strength multiplier: 1.25
@@ -227,6 +231,7 @@ class Skeleton(Undead):
     def __init__(self, *args, **kwargs):
         super(Skeleton, self).__init__(*args, **kwargs)
         self.fight_sequence = deque(['bash', 'fight', 'life_drain'])
+
     def bash(self, target):
         """
         damage: strength * 2
@@ -234,6 +239,7 @@ class Skeleton(Undead):
         damage = self.strength * 2
         target.take_damage(damage)
         return self._attack_message(target, damage, 'bash')
+
 
 
 class Humanoid(Monster):
@@ -244,6 +250,7 @@ class Humanoid(Monster):
         damage = self.strength + self.speed
         target.take_damage(damage)
         return self._attack_message(target, damage, 'slash')
+
 
 
 class Troll(Humanoid):
@@ -259,6 +266,7 @@ class Troll(Humanoid):
     def __init__(self, *args, **kwargs):
         super(Troll, self).__init__(*args, **kwargs)
         self.fight_sequence = deque(['slash', 'fight', 'regenerate'])
+
     def regenerate(self, *args):
         """
         heals self for constitution
@@ -267,6 +275,7 @@ class Troll(Humanoid):
         self.heal_damage(healing)
         return ['{monster} regenerates {healing} health!'.format(monster=type(self).__name__,
                                                                    healing=healing)]
+
 
 
 class Orc(Humanoid):
@@ -281,6 +290,7 @@ class Orc(Humanoid):
     def __init__(self, *args, **kwargs):
         super(Orc, self).__init__(*args, **kwargs)
         self.fight_sequence = deque(['blood_rage', 'slash', 'fight'])
+
     def blood_rage(self, target):
         """
         cost: constitution * 0.5 hp
@@ -294,5 +304,6 @@ class Orc(Humanoid):
         message.append('{monster} takes {damage} self-inflicted damage!'.format(monster=type(self).__name__,
                                                                                 damage=health_cost))
         return message
+
 
         
