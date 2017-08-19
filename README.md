@@ -72,6 +72,8 @@ We will be breaking the project down into three primary parts: **Heroes**, **Mon
 
 **Battles** This is what brings everything together. Participants will perform actions in order of their `speed` attribute - faster units go before slower units. Hero abilities are user determined, monster abilities are used according to their *command queue* (described below) and target heroes randomly. Battle continues until either all the heroes or all the monsters are wiped out.
 
+*Keep in mind when writing your classes/methods on how you can break problems down into smaller tasks/methods to write smaller, more easily maintainable bits of code. Do not hesitate to create helper methods.*
+
 **Heroes**
 ======
 > **Features common to all Heroes:**
@@ -95,6 +97,8 @@ We will be breaking the project down into three primary parts: **Heroes**, **Mon
 > - `take_damage(damage)` - hero takes `damage` amount of damage, having it subtracted from their current hp
 > - `heal_damage(healing)` - hero heals `healing` hit points, but not beyond their `maxhp`
 > - `is_dead()` - if the hero's hp have been completely depleted this returns `True`
+
+It is advised to also make use of a `_level_up()` helper method to handle the levelling up process, making other helper methods may also be useful.
 
 
 
