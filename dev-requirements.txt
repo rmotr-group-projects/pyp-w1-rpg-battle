@@ -2,3 +2,4 @@ coverage==4.2
 pytest==3.0.6
 pytest-cov==2.4.0
 tox==2.3.1
+six==1.10.0
