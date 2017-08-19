@@ -37,14 +37,20 @@ class BattleTestCase(unittest.TestCase):
                            ('Orc hits', 'with blood rage for', 'damage!'),
                            ('Orc takes', 'self-inflicted damage!'),
                            ("Mage's turn!",)]
-        output = battle.start().splitlines()
+        output = []
+        while not battle.is_hero_turn():
+            output.extend(battle.next_turn())
+        else:
+            output.extend(battle.next_turn())
+
         for line, expected in zip(output, expected_output):
             for item in expected:
                 self.assertIn(item, line)
 
         expected_output = [('Mage hits Orc with fireball for', 'damage!'),
                            ("Warrior's turn!",)]
-        output = battle.execute_command('fireball', orc).splitlines()
+        output = battle.execute_command('fireball', orc)
+
         for line, expected in zip(output, expected_output):
             for item in expected:
                 self.assertIn(item, line)
@@ -56,7 +62,8 @@ class BattleTestCase(unittest.TestCase):
                            ('is now level 2!',),
                            ('GreenDragon hits', 'with tail swipe for','damage!'),
                            ("Mage's turn!")]
-        output = battle.execute_command('shield_slam', orc).splitlines()
+        output = battle.execute_command('shield_slam', orc)
+
         for line, expected in zip(output, expected_output):
             for item in expected:
                 self.assertIn(item, line)
@@ -68,12 +75,18 @@ class BattleTestCase(unittest.TestCase):
 
         battle = Battle(participants)
 
-        battle.start()
+        while not battle.is_hero_turn():
+            battle.next_turn()
+        else:
+            battle.next_turn()
+
 
         with self.assertRaises(Victory):
             expected_output = 'Skeleton dies!'
             output = battle.execute_command('backstab', skeleton)
             self.assertIn(expected_output, output)
+            battle.next_turn()
+
 
     def test_defeat(self):
         mage = heroes.Mage()
@@ -83,7 +96,12 @@ class BattleTestCase(unittest.TestCase):
         battle = Battle(participants)
 
         with self.assertRaises(Defeat):
-            battle.start()
+            output = []
+            while not battle.is_hero_turn():
+                battle.next_turn()
+            else:
+                battle.next_turn()
+
 
     def test_xp_gain(self):
         cleric = heroes.Cleric()
@@ -95,8 +113,14 @@ class BattleTestCase(unittest.TestCase):
 
         before_level = cleric.level
 
-        battle.start()
+        while not battle.is_hero_turn():
+            battle.next_turn()
+        else:
+            battle.next_turn()
+
         with self.assertRaises(Victory):
             battle.execute_command('smite', troll)
+            battle.next_turn()
+
         after_level = cleric.level
         self.assertNotEqual(before_level, after_level)
