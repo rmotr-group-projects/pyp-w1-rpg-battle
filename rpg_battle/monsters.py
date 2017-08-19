@@ -6,14 +6,16 @@ class Monster(object):
     BASE_STATS = {'strength': 8,
              'constitution': 8,
              'intelligence': 8,
-             'speed': 8}
+             'speed': 12}
     BASE_HP = 10
+    XP_MULTIPLIER = 1
     def __init__(self, level=1):
         """
         Sets up stats and levels up the monster if necessary
         """
+        multipliers = getattr(self, 'MULTIPLIERS', {})
         for stat, base in Monster.BASE_STATS.items():
-            multipier = getattr(self, '{}_MULTIPLIER'.format(stat.upper()), 1)
+            multipier = multipliers.get(stat, 1)
             setattr(self, stat, int(base * multipier) + int((level - 1) * multipier))
         self.maxhp = self.BASE_HP + int((level - 1) * self.constitution * 0.5)
         self.hp = self.maxhp
@@ -22,9 +24,9 @@ class Monster(object):
     def xp(self):
         """
         Returns the xp value of monster if defeated.
-        XP value formula: (average of stats) + (maxhp % 10)
+        XP value formula: ((average of stats) + (maxhp / 10)) * xp multiplier
         """
-        return int((sum([getattr(self, stat) for stat in self.BASE_STATS]) / 4) + (self.maxhp % 10))
+        return int(((sum([getattr(self, stat) for stat in self.BASE_STATS]) / 4) + (self.maxhp / 10)) * self.XP_MULTIPLIER)
 
     def fight(self, target):
         """
@@ -63,23 +65,23 @@ class Monster(object):
         """
         command = self.fight_sequence.popleft()
         ability = getattr(self, command)
-        message = ability(target)
+        log = ability(target)
         self.fight_sequence.append(command)
-        return message
+        return log
 
     def _attack_message(self, target, damage, attack=None):
         monster = type(self).__name__
         target_name = type(target).__name__
         if attack:
-            message = "{monster} hits {target} with {attack} for {damage} damage!\n"
-            return message.format(monster=monster,
-                                  target=target_name,
-                                  attack=attack,
-                                  damage=damage)
+            message = "{monster} hits {target} with {attack} for {damage} damage!"
+            return [message.format(monster=monster,
+                                   target=target_name,
+                                   attack=attack,
+                                   damage=damage)]
         else:
-            return "{monster} attacks {target} for {damage}!\n".format(monster=monster,
-                                                                       target=target_name,
-                                                                       damage=damage)
+            return ["{monster} attacks {target} for {damage}!".format(monster=monster,
+                                                                      target=target_name,
+                                                                      damage=damage)]
 
 
 
@@ -89,8 +91,13 @@ class Dragon(Monster):
     constitution multiplier: 2
     special feature: Reduce all damage taken by 5
     """
-    CONSTITUTION_MULTIPLIER = 2
+    MULTIPLIERS = {'constitution': 2}
     BASE_HP = 100
+    XP_MULTIPLIER = 2
+
+    @classmethod
+    def multipliers(cls):
+        return {'constitution': 2}
 
     # Dragons have damage reduction
     def take_damage(self, damage):
@@ -100,9 +107,9 @@ class Dragon(Monster):
 
     def tail_swipe(self, target):
         """
-        damage: strength + speed
+        damage: 1.5*(strength + speed)
         """
-        damage = self.strength + self.speed
+        damage = int(1.5*(self.strength + self.speed))
         target.take_damage(damage)
         return self._attack_message(target, damage, 'tail swipe')
 
@@ -113,17 +120,19 @@ class RedDragon(Dragon):
     intelligence multiplier: 1.5
     command queue: fire_breath, tail_swipe, fight
     """
-    STRENGTH_MULTIPLIER = 2
-    INTELLIGENCE_MULTIPLIER = 1.5
+    MULTIPLIERS = Dragon.MULTIPLIERS.copy()
+    MULTIPLIERS.update({'strength': 2,
+                        'intelligence': 1.5})
+    
     def __init__(self, *args, **kwargs):
         super(RedDragon, self).__init__(*args, **kwargs)
         self.fight_sequence = deque(['fire_breath', 'tail_swipe', 'fight'])
 
     def fire_breath(self, target):
         """
-        damage: intelligence * 2.5
+        damage: intelligence * 3
         """
-        damage = int(self.intelligence * 2.5)
+        damage = int(self.intelligence * 3)
         target.take_damage(damage)
         return self._attack_message(target, damage, 'fire breath')
 
@@ -134,8 +143,9 @@ class GreenDragon(Dragon):
     speed multiplier: 1.5
     command queue: poison_breath, tail_swipe, fight
     """
-    STRENGTH_MULTIPLIER = 1.5
-    SPEED_MULTIPLIER = 1.5
+    MULTIPLIERS = Dragon.MULTIPLIERS.copy()
+    MULTIPLIERS.update({'strength': 1.5,
+                        'speed': 1.5})
     def __init__(self, *args, **kwargs):
         super(GreenDragon, self).__init__(*args, **kwargs)
         self.fight_sequence = deque(['poison_breath', 'tail_swipe', 'fight'])
@@ -153,7 +163,7 @@ class Undead(Monster):
     constitution multiplier: 0.25
     special feature: undead take damage from healing except their own healing abilities
     """
-    CONSTITUTION_MULTIPLIER = 0.25
+    MULTIPLIERS = {'constitution': 0.25}
     # Undead take damage from healing
     def heal_damage(self, healing):
         self.take_damage(healing)
@@ -167,8 +177,8 @@ class Undead(Monster):
         target.take_damage(damage)
         super(Undead, self).heal_damage(damage)
         message = self._attack_message(target, damage, 'drain life')
-        message += '{monster} heals for {healing}!\n'.format(monster=type(self).__name__,
-                                                             healing=damage)
+        message.append('{monster} heals for {healing}!'.format(monster=type(self).__name__,
+                                                               healing=damage))
         return message
 
 
@@ -178,26 +188,27 @@ class Vampire(Undead):
     intelligence multiplier: 2
     command queue: fight, bite, life_drain
     """
-    INTELLIGENCE_MULTIPLIER = 2
-    BASE_HP = 30
+    MULTIPLIERS = Undead.MULTIPLIERS.copy()
+    MULTIPLIERS.update({'intelligence': 2})
+    BASE_HP = 45
     def __init__(self, *args, **kwargs):
         super(Vampire, self).__init__(*args, **kwargs)
         self.fight_sequence = deque(['fight', 'bite', 'life_drain'])
     def bite(self, target):
         """
-        damage: speed * 0.5
+        damage: speed * 2
         also reduces target's maxhp by amount equal to damage done
         heals unit for damage done
         """
-        damage = int(self.speed * 0.5)
+        damage = int(self.speed * 2)
         target.take_damage(damage)
         target.maxhp -= damage
         Monster.heal_damage(self, damage)
         message = self._attack_message(target, damage, 'bite')
-        message += "{target}'s maximum hp has been reduced by {damage}!\n".format(target=target,
-                                                                                  damage=damage)
-        message += "{monster} heals for {healing}!\n".format(monster=type(self).__name__,
-                                                             healing=damage)
+        message.append("{target}'s maximum hp has been reduced by {damage}!".format(target=target.__class__.__name__,
+                                                                                    damage=damage))
+        message.append("{monster} heals for {healing}!".format(monster=type(self).__name__,
+                                                               healing=damage))
         return message
 
 
@@ -208,9 +219,11 @@ class Skeleton(Undead):
     intelligence multiplier: 0.25
     command queue: bash, fight, life_drain
     """
-    STRENGTH_MULTIPLIER = 1.25
-    SPEED_MULTIPLIER = 0.5
-    INTELLIGENCE_MULTIPLIER = 0.25
+    MULTIPLIERS = Undead.MULTIPLIERS.copy()
+    MULTIPLIERS.update({'strength': 1.25,
+                        'speed': 0.5,
+                        'intelligence': 0.25})
+    BASE_HP = 30
     def __init__(self, *args, **kwargs):
         super(Skeleton, self).__init__(*args, **kwargs)
         self.fight_sequence = deque(['bash', 'fight', 'life_drain'])
@@ -238,9 +251,10 @@ class Troll(Humanoid):
     strength multiplier: 1.75
     constitution multiplier: 1.5
     base hp: 20
+    command queue: slash, fight, regenerate
     """
-    STRENGTH_MULTIPLIER = 1.75
-    CONSTITUTION_MULTIPLIER = 1.5
+    MULTIPLIERS = {'strength': 1.75,
+                   'constitution': 1.5}
     BASE_HP = 20
     def __init__(self, *args, **kwargs):
         super(Troll, self).__init__(*args, **kwargs)
@@ -251,17 +265,19 @@ class Troll(Humanoid):
         """
         healing = self.constitution
         self.heal_damage(healing)
-        return '{monster} regenerates {healing} health!\n'.format(monster=type(self).__name__,
-                                                                  healing=healing)
+        return ['{monster} regenerates {healing} health!'.format(monster=type(self).__name__,
+                                                                   healing=healing)]
 
 
 class Orc(Humanoid):
     """
     strength multiplier: 1.75
     base hp: 16
+    command queue: blood_rage, slash, fight
     """
-    STRENGTH_MULTIPLIER = 1.75
+    MULTIPLIERS = {'strength': 1.75}
     BASE_HP = 16
+    XP_MULTIPLIER = 0.5
     def __init__(self, *args, **kwargs):
         super(Orc, self).__init__(*args, **kwargs)
         self.fight_sequence = deque(['blood_rage', 'slash', 'fight'])
@@ -275,8 +291,8 @@ class Orc(Humanoid):
         target.take_damage(damage)
         self.take_damage(health_cost)
         message = self._attack_message(target, damage, 'blood rage')
-        message += '{monster} takes {damage} self-inflicted damage!\n'.format(monster=type(self).__name__,
-                                                                              damage=health_cost)
+        message.append('{monster} takes {damage} self-inflicted damage!'.format(monster=type(self).__name__,
+                                                                                damage=health_cost))
         return message
 
         

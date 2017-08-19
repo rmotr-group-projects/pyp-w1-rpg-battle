@@ -5,6 +5,65 @@ Today we will be creating a traditional RPG (*role-playing game*) battle system 
 
 We will be breaking the project down into three primary parts: **Heroes**, **Monsters**, and **Battles**.
 
+**Running Tests**
+=================
+You may run the entire test suite by executing: `make test`
+
+However it is **highly suggested** to run individual tests one at a time, write code to make the test pass, and then proceed to the next test, repeating the process.
+
+You may run individual tests by executing:
+```
+PYTHONPATH=. py.test tests/[test file] -k [name of test]
+```
+So for example to run `test_base_creation` in `test_heroes.py` you would run:
+```
+PYTHONPATH=. py.test tests/test_heroes.py -k test_base_creation
+```
+The `-k` option indicates a keyword search. You could also use it to run **all** the creation tests in the `test_heroes.py` file by running:
+```
+PYTHONPATH=. py.test tests/test_heroes.py -k creation
+```
+Finally, you may also run specifically one test using the followind format:
+```
+PYTHONPATH=. py.test tests/[test file]::[test case]::[name of test function]
+```
+To run **only** the `test_base_creation` from `BaseHeroTestCase` you would run:
+```
+PYTHONPATH=. py.test tests/test_heroes.py::BaseHeroTestCase::test_base_creation
+```
+
+
+**Using getattr and setattr**
+=================
+`getattr` and `setattr` are useful tools for dynamically reading and setting attributes.
+
+`getattr` is defined as such: `getattr(object, name[, default])` and allows you to retrieve an attribute from `object` named `name`, and optionally set a `default` value if the attribute doesn't exist. It is important to note that `name` is **a string**, this is what makes `getattr` so useful as you can manipulate the string however you want before giving it to `getattr`
+
+Very basic example, say we had a Person class with the attributes `name`, `phone`, `address`, `email`:
+```
+person = Person(name='John', email='example@example.com')
+for attr in ('name', 'phone', 'address', 'email'):
+    print("{name}: {value}".format(name=attr, value=getattr(person, attr, 'N/A')))
+```
+The above would print the following:
+```
+name: John
+phone: N/A
+address: N/A
+email: example@example.com
+```
+`setattr` is the counterpart to `getattr` and is defined as: `getattr(object, name, value)
+
+If we wanted to define the People class from above so that we could take **any** keyword arguments when intialising we could write it like this:
+```
+class People(object):
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+```
+
+It's important to note how this relates to inheritance. You can use getattr to read values in your base class that may or may not have been set in your child classes.
+
 **Heroes**
 ======
 > **Features common to all Heroes:**
@@ -124,7 +183,7 @@ Cleric
 > `heal(target)`
 
 > - Cost: 4 MP
-> - Heals target for `constitution`
+> - Heals target for 3 * `constitution`
 
 
 ----------
@@ -182,14 +241,14 @@ Rogue
 ----------
 
 > **Stats**
-> Monsters start with a base stat level of 8 versus the 6 that heroes receive. Instead of receiving stat modifiers like heroes, monsters may receive stat multiplier instead. These are applied in the following manner: At level 1 a stat is set to 8x the stat multiplier. For levelled monsters set the stat to 8X multiplier + `(level - 1`)x multiplier, dropping fractions.
+> Monsters start with a base stat level of 8 for all stats except speed versus the 6 that heroes receive, monster speed has a base of 12. Instead of receiving stat modifiers like heroes, monsters may receive stat multiplier instead. These are applied in the following manner: At level 1 a stat is set to `base value` x the stat multiplier. For levelled monsters set the stat to `base value` X multiplier + `(level - 1)` x multiplier, dropping fractions.
 > Monster have a base HP of 10 (this may be overidden by monster families and subtypes, more on this later) to calculate their actual `maxhp` use the base hp + (level - 1) x (0.5x `constitution`), dropping fractions as usual.
 > 
 
 
 ----------
 > **XP**
-> A monster's xp value may be calculated by taking the average of their stats (`strength`, `constitution`, `intelligence`, `speed`) and adding it to `maxhp % 10`.
+> A monster's xp value may be calculated by taking the average of their stats (`strength`, `constitution`, `intelligence`, `speed`) and adding it to `maxhp / 10`. Finally we take this all and multiply it by the `XP_MULTIPLIER`.
 
 
 ----------
@@ -206,8 +265,9 @@ Monsters are divided into families before being separated into individual monste
 
 > - Base HP: 100
 > - `constitution` multiplier: 2
+> - `xp` multiplier: 2
 > - **Special feature:** Dragons have damage reduction, all damage they take is reduced by 5.
-> - `tail_swipe(target)` : Deals `strength` + `speed` damage
+> - `tail_swipe(target)` : Deals 1.5 * (`strength` + `speed`) damage
 
 
 ----------
@@ -215,7 +275,7 @@ Monsters are divided into families before being separated into individual monste
 
 > - `strength` multiplier: 2
 > - `intelligence` multiplier: 1.5
-> - `fire_breath(target)`: deals 2.5x `intelligence` damage
+> - `fire_breath(target)`: deals 3x `intelligence` damage
 
 
 ----------
@@ -238,8 +298,8 @@ Monsters are divided into families before being separated into individual monste
 >**Vampire**
 
 > - `intelligence` multiplier: 2
-> - Base HP: 30
-> - `bite(target)`: Deals 0.5x `speed` damage to the target, healing the Vampire for the same amount. **Permanently lowers the target's `maxhp` by an amount equal to the damage dealt.**
+> - Base HP: 45
+> - `bite(target)`: Deals 2x `speed` damage to the target, healing the Vampire for the same amount. **Permanently lowers the target's `maxhp` by an amount equal to the damage dealt.**
 
 
 ----------
@@ -248,6 +308,7 @@ Monsters are divided into families before being separated into individual monste
 > - `strength` multiplier: 1.25
 > - `speed` multiplier: 0.5
 > - `intelligence` multiplier: 0.25
+> - Base HP: 30
 > - `bash(target)`: deal 2x `strength` damage
 
 **Humanoid**
@@ -280,14 +341,27 @@ Preparing a battle should be as simple as creating a new `Battle` while passing 
 
 A Battle should have the following outward facing interface:
 
-- `start()`: Starts the battle!
+- `next_turn()`: processes the next unit's turn
 - `current_attacker()`: returns the unit at the front of the initiative queue
+- `is_hero_turn()`: returns `True` if `current_attacker` is a `Hero`
+- `is_monster_turn()`: returns `True` if `current_attacker` is a `Monster`
 - `execute_command(command, target)`: uses an ability on the target
+- `raise_for_battle_over()`: raises `Victory` if all monsters are defeated, and raises `Defeat` if all heroes are defeated
 
-Upon running the `start` command the program should check to see if the current attacker is a monster, if it is it will pick a hero target at random and use the monster's next attack in its command queue. It will then repeat the process until it reaches a hero's turn. At this point it returns a multi-line string containing all the events that have happened so far and stating what hero's turn it is. (Details on event formatting below.) It is then up to the user to select a target and action and then `execute_command`. This will run the corresponding command (throwing any appropriate errors, including `InvalidCommand` if the command doesn't exist) and then resume the cycle of moving through the initiative queue until it reaches a Hero again. At the end of each unit's turn all dead units should be removed from the initiative queue and xp should be rewarded to all heroes for any monsters killed, triggering level ups if appropriate. If at any time all the monsters are wiped out the program should raise a Victory, if all the heroes are killed it should raise a Defeat.
+The following helper methods are recomended to break the project into smaller, more manageable chunks:
+
+- `_monster_turn()`: handles a monster's turn
+- `_hero_turn()`: announces (adds to the event log) that it is a hero's turn
+- `_process_initiative()`: handles rearranging the initiative after a unit's turn
+- `_process_dead()`: handles removing dead units from the initiative queue and triggers xp rewards
+- `_reward_xp()`: handles rewarding xp to living members of the party
+- `_check_victory()`: returns `True` if 0 monsters in initiative queue
+- `_check_defeat(): returns `True` if 0 heroes in initiative queue
+
+Upon running the `next_turn` command the program should check to see if the current attacker is a monster, if it is it will pick a hero target at random and use the monster's next attack in its command queue. It will then repeat the process until it reaches a hero's turn. At this point it returns a multi-line string containing all the events that have happened so far and stating what hero's turn it is. (Details on event formatting below.) It is then up to the user to select a target and action and then `execute_command`. This will run the corresponding command (throwing any appropriate errors, including `InvalidCommand` if the command doesn't exist) and then resume the cycle of moving through the initiative queue until it reaches a Hero again. At the end of each unit's turn all dead units should be removed from the initiative queue and xp should be rewarded to all heroes for any monsters killed, triggering level ups if appropriate. If at the start of a turn all the monsters are dead the program should raise a Victory, if all the heroes are dead it should raise a Defeat.
 
 > **Event formatting**
-> Each event should be recorded on a new line in the multi-line string that is returned
+> Each event should be recorded as a new entry in the list that is returned
 
 > - *`fight` command used: `{monster} attacks {target} for {damage}!`
 > - other attack ability used: `{monster} hits {target} with {ability} for {damage} damage!`
