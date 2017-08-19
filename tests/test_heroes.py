@@ -23,6 +23,7 @@ class BaseHeroTestCase(unittest.TestCase):
         self.dummy = TargetDummy()
 
     def test_base_creation(self):
+
         expected_stats = {'str': 6,
                           'con': 6,
                           'int': 6,
@@ -262,6 +263,7 @@ class ClericTestCase(unittest.TestCase):
 
     def test_heal(self):
         self.hero.take_damage(22)
+
         self.hero.heal(self.hero)
         self.assertEqual(self.hero.mp, self.hero.maxmp - 4)
         self.assertEqual(self.hero.hp, self.hero.maxhp - 1)

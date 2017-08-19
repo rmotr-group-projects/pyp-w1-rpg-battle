@@ -72,7 +72,6 @@ We will be breaking the project down into three primary parts: **Heroes**, **Mon
 
 **Battles** This is what brings everything together. Participants will perform actions in order of their `speed` attribute - faster units go before slower units. Hero abilities are user determined, monster abilities are used according to their *command queue* (described below) and target heroes randomly. Battle continues until either all the heroes or all the monsters are wiped out.
 
-
 **Heroes**
 ======
 > **Features common to all Heroes:**

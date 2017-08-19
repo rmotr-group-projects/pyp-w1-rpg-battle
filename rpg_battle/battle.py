@@ -14,6 +14,7 @@ class Battle(object):
         self.participants = participants
         self.initiative_order = deque(sorted(participants, key=lambda x: x.speed))
 
+
     def current_attacker(self):
         """
         returns unit at front of initiative queue
@@ -87,6 +88,7 @@ class Battle(object):
                                                                  level=hero.level))
         return log
 
+
     def execute_command(self, command, target):
         """
         causes current hero to execute a command on a target
@@ -101,6 +103,7 @@ class Battle(object):
         self._process_initiative()
         log.extend(self._process_dead())
         return log
+
 
 
 
