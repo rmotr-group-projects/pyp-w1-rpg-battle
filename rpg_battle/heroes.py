@@ -12,8 +12,9 @@ class Hero(object):
         """
         Sets stats up and levels up hero if necessary.
         """
+        modifiers = getattr(self, 'MODIFIERS', {})
         for stat, base in Hero.BASE_STATS.items():
-            setattr(self, stat, base + getattr(self, stat.upper() + '_MODIFIER', 0))
+            setattr(self, stat, base + modifiers.get(stat, 0))
         self.maxhp = int(self.BASE_HP + (self.constitution * 0.5))
         self.hp = self.maxhp
         self.maxmp = int(self.BASE_MP + (self.intelligence * 0.5))
@@ -24,10 +25,11 @@ class Hero(object):
             self._level_up()
 
     def _level_up(self):
+        modifiers = getattr(self, 'MODIFIERS', {})
         for stat in Hero.BASE_STATS:    
             base_increase = 1
             current = getattr(self, stat)
-            modifier = getattr(self, '{}_MODIFIER'.format(stat.upper()), 0)
+            modifier = modifiers.get(stat, 0)
             new_value = current + base_increase + (modifier if modifier > 0 else 0)
             setattr(self, stat, new_value)
         self.maxhp += int(self.constitution * 0.5)
@@ -90,15 +92,19 @@ class Hero(object):
         hero = type(self).__name__
         target_name = type(target).__name__
         if attack:
-            message = "{hero} hits {target} with {attack} for {damage} damage!\n"
-            return message.format(hero=hero,
+            message = "{hero} hits {target} with {attack} for {damage} damage!"
+            return [message.format(hero=hero,
                                   target=target_name,
                                   attack=attack,
-                                  damage=damage)
+                                  damage=damage)]
         else:
-            return "{hero} attacks {target} for {damage}!\n".format(hero=hero,
+            return ["{hero} attacks {target} for {damage}!".format(hero=hero,
                                                                     target=target_name,
-                                                                    damage=damage)
+                                                                    damage=damage)]
+
+    def _has_enough_mp(self, req_mp):
+        if self.mp < req_mp:
+            raise InsufficientMP()
 
 class Warrior(Hero):
     """
@@ -108,10 +114,10 @@ class Warrior(Hero):
     constitution +2
     speed -1
     """
-    STRENGTH_MODIFIER = 1
-    INTELLIGENCE_MODIFIER = -2
-    CONSTITUTION_MODIFIER = 2
-    SPEED_MODIFIER = -1
+    MODIFIERS = {'strength': 1,
+                 'intelligence': -2,
+                 'constitution': 2,
+                 'speed': -1}
 
     abilities = ('fight', 'shield_slam', 'reckless_charge')
     
@@ -121,8 +127,7 @@ class Warrior(Hero):
         damage: 1.5 * strength
         """
         cost = 5
-        if self.mp < cost:
-            raise InsufficientMP()
+        self._has_enough_mp(cost)
         damage = int(self.strength * 1.5)
         target.take_damage(damage)
         self.mp -= cost
@@ -131,15 +136,15 @@ class Warrior(Hero):
     def reckless_charge(self, target):
         """
         cost: 4 hp
-        damage: 1.5 * strength
+        damage: 2 * strength
         """
         health_cost = 4
         damage = self.strength * 2
         target.take_damage(damage)
         self.take_damage(health_cost)
         message = self._attack_message(target, damage, 'reckless charge')
-        message += '{hero} takes {damage} self-inflicted damage!\n'.format(hero=type(self).__name__,
-                                                                           damage=health_cost)
+        message.append('{hero} takes {damage} self-inflicted damage!'.format(hero=type(self).__name__,
+                                                                               damage=health_cost))
         return message
 
 class Mage(Hero):
@@ -149,9 +154,9 @@ class Mage(Hero):
     inteligence +3
     constitution -2
     """
-    STRENGTH_MODIFIER = -2
-    INTELLIGENCE_MODIFIER = 3
-    CONSTITUTION_MODIFIER = -2
+    MODIFIERS = {'strength': -2,
+                 'intelligence': 3,
+                 'constitution': -2}
 
     abilities = ('fight', 'fireball', 'frostbolt')
 
@@ -161,8 +166,7 @@ class Mage(Hero):
         damage: 6 + (0.5 * intelligence)
         """
         cost = 8
-        if self.mp < cost:
-            raise InsufficientMP()
+        self._has_enough_mp(cost)
         damage = 6 + int(self.intelligence * 0.5)
         target.take_damage(damage)
         self.mp -= cost
@@ -174,8 +178,7 @@ class Mage(Hero):
         damage: 3 + level
         """
         cost = 3
-        if self.mp < cost:
-            raise InsufficientMP()
+        self._has_enough_mp(cost)
         damage = 3 + self.level
         target.take_damage(damage)
         self.mp -= cost
@@ -187,25 +190,24 @@ class Cleric(Hero):
     speed -1
     constitution +1
     """
-    SPEED_MODIFIER = -1
-    CONSTITUTION_MODIFIER = 1
+    MODIFIERS = {'speed': -1,
+                 'constitution': 1}
 
     abilities = ('fight', 'heal', 'smite')
 
     def heal(self, target):
         """
         cost: 4 mp
-        healing: constitution
+        healing: 3 * constitution
         """
         cost = 4
-        if self.mp < cost:
-            raise InsufficientMP()
-        healing = self.constitution
+        self._has_enough_mp(cost)
+        healing = 3 * self.constitution
         target.heal_damage(healing)
         self.mp -= cost
-        return '{hero} heals {target} for {healing}!\n'.format(hero=type(self).__name__,
-                                                               target=target,
-                                                               healing=healing)
+        return ['{hero} heals {target} for {healing}!'.format(hero=type(self).__name__,
+                                                                target=type(target).__name__,
+                                                                healing=healing)]
 
     def smite(self, target):
         """
@@ -213,8 +215,7 @@ class Cleric(Hero):
         damage: 4 + (0.5 * (intelligence + constitution))
         """
         cost = 7
-        if self.mp < cost:
-            raise InsufficientMP()
+        self._has_enough_mp(cost)
         damage = 4 + int((self.constitution + self.intelligence) * 0.5)
         target.take_damage(damage)
         self.mp -= cost
@@ -228,10 +229,10 @@ class Rogue(Hero):
     intelligence -1
     constitution -2
     """
-    SPEED_MODIFIER = 2
-    STRENGTH_MODIFIER = 1
-    INTELLIGENCE_MODIFIER = -1
-    CONSTITUTION_MODIFIER = -2
+    MODIFIERS = {'speed': 2,
+                 'strength': 1,
+                 'intelligence': -1,
+                 'constitution': -2}
 
     abilities = ('fight', 'backstab', 'rapid_strike')
 
@@ -253,8 +254,7 @@ class Rogue(Hero):
         damage: 4 + speed
         """
         cost = 5
-        if self.mp < cost:
-            raise InsufficientMP()
+        self._has_enough_mp(cost)
         damage = 4 + self.speed
         target.take_damage(damage)
         self.mp -= cost

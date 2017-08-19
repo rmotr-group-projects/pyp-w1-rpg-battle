@@ -20,55 +20,72 @@ class Battle(object):
         """
         return self.initiative_order[-1]
 
-    def start(self):
-        return self.next_turn()
+    def is_hero_turn(self):
+        return isinstance(self.current_attacker(), Hero)
+
+    def is_monster_turn(self):
+        return isinstance(self.current_attacker(), Monster)
 
     def next_turn(self):
-        message = ''
-        while isinstance(self.current_attacker(), Monster):
-            message += self._monster_turn()
-        
-        message +=self._player_turn()
+        self.raise_for_battle_over()
+        battle_log = []
+        if self.is_monster_turn():
+            battle_log.extend(self._monster_turn())
+        else:
+            battle_log.append(self._hero_turn())
 
-        return message
+        return battle_log
 
     def _monster_turn(self):
+        log = []
         monster = self.current_attacker()
         target = random.choice([unit for unit in self.participants if isinstance(unit, Hero) and not unit.is_dead()])
-        message = monster.attack(target)
+        log.extend(monster.attack(target))
         self._process_initiative()
-        message += self._process_dead()
-        return message
+        log.extend(self._process_dead())
+        return log
 
-    def _player_turn(self):
-        return "{}'s turn!\n".format(type(self.current_attacker()).__name__)
+    def raise_for_battle_over(self):
+        if self._check_victory():
+            raise Victory
+        if self._check_defeat():
+            raise Defeat
+
+    def _hero_turn(self):
+        return "{}'s turn!".format(type(self.current_attacker()).__name__)
 
     def _process_initiative(self):
         self.initiative_order.appendleft(self.initiative_order.pop())
 
+    def _check_victory(self):
+        return len([unit for unit in self.initiative_order if isinstance(unit, Monster)]) == 0
+
+    def _check_defeat(self):
+        return len([unit for unit in self.initiative_order if isinstance(unit, Hero)]) == 0
+
     def _process_dead(self):
-        message = ''
+        log = []
         corpses = [unit for unit in self.initiative_order if unit.is_dead()]
         for body in corpses:
-            message += '{} dies!\n'.format(type(body).__name__)
+            log.append('{} dies!'.format(type(body).__name__))
             if isinstance(body, Monster):
-                message += self._reward_xp(body.xp())
+                log.extend(self._reward_xp(body.xp()))
         self.initiative_order = deque([unit for unit in self.initiative_order if not unit.is_dead()])
-        if len([unit for unit in self.initiative_order if isinstance(unit, Hero)]) == 0:
-            raise Defeat
-        if len([unit for unit in self.initiative_order if isinstance(unit, Monster)]) == 0:
-            raise Victory
-        return message
+        if self._check_defeat():
+            log.append('The party was defeated.')
+        if self._check_victory():
+            log.append('The party was victorious!')
+        return log
 
     def _reward_xp(self, xp):
-        message = '{xp} XP rewarded!\n'.format(xp=xp)
+        log = ['{xp} XP rewarded!'.format(xp=xp)]
         for hero in [unit for unit in self.initiative_order if isinstance(unit, Hero) and not unit.is_dead()]:
             before_level = hero.level
             hero.gain_xp(xp)
             if hero.level > before_level:
-                message += '{hero} is now level {level}!\n'.format(hero=type(hero).__name__,
-                                                                   level=hero.level)
-        return message
+                log.append('{hero} is now level {level}!'.format(hero=type(hero).__name__,
+                                                                 level=hero.level))
+        return log
 
     def execute_command(self, command, target):
         """
@@ -80,11 +97,10 @@ class Battle(object):
             raise InvalidCommand()
         if target.is_dead():
             raise InvalidTarget()
-        message = getattr(self.current_attacker(), command)(target)
+        log = getattr(self.current_attacker(), command)(target)
         self._process_initiative()
-        message += self._process_dead()
-        message += self.next_turn()
-        return message
+        log.extend(self._process_dead())
+        return log
 
 
 

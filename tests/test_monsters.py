@@ -26,7 +26,7 @@ class BaseMonsterTestCase(unittest.TestCase):
         expected_stats = {'str': 8,
                           'con': 8,
                           'int': 8,
-                          'spd': 8,
+                          'spd': 12,
                           'maxhp': 10}
         actual_stats = {'str': self.monster.strength,
                         'con': self.monster.constitution,
@@ -43,7 +43,7 @@ class BaseMonsterTestCase(unittest.TestCase):
         expected_stats = {'str': 12,
                           'con': 12,
                           'int': 12,
-                          'spd': 12,
+                          'spd': 16,
                           'maxhp': 34}
         actual_stats = {'str': self.monster.strength,
                         'con': self.monster.constitution,
@@ -88,7 +88,7 @@ class DragonTestCase(unittest.TestCase):
         expected_stats = {'str': 16,
                           'con': 16,
                           'int': 12,
-                          'spd': 8,
+                          'spd': 12,
                           'maxhp': 100}
         actual_stats = {'str': dragon.strength,
                         'con': dragon.constitution,
@@ -104,7 +104,7 @@ class DragonTestCase(unittest.TestCase):
         expected_stats = {'str': 24,
                           'con': 24,
                           'int': 18,
-                          'spd': 12,
+                          'spd': 16,
                           'maxhp': 148}
         actual_stats = {'str': dragon.strength,
                         'con': dragon.constitution,
@@ -118,19 +118,19 @@ class DragonTestCase(unittest.TestCase):
     def test_red_dragon_tail_swipe(self):
         dragon = monsters.RedDragon()
         dragon.tail_swipe(self.dummy)
-        self.assertEqual(self.dummy.hp, self.dummy.maxhp - 24)
+        self.assertEqual(self.dummy.hp, self.dummy.maxhp - 42)
 
     def test_red_dragon_breath_weapon(self):
         dragon = monsters.RedDragon()
         dragon.fire_breath(self.dummy)
-        self.assertEqual(self.dummy.hp, self.dummy.maxhp - 30)
+        self.assertEqual(self.dummy.hp, self.dummy.maxhp - 36)
 
     def test_create_green_dragon(self):
         dragon = monsters.GreenDragon()
         expected_stats = {'str': 12,
                           'con': 16,
                           'int': 8,
-                          'spd': 12,
+                          'spd': 18,
                           'maxhp': 100}
         actual_stats = {'str': dragon.strength,
                         'con': dragon.constitution,
@@ -146,7 +146,7 @@ class DragonTestCase(unittest.TestCase):
         expected_stats = {'str': 18,
                           'con': 24,
                           'int': 12,
-                          'spd': 18,
+                          'spd': 24,
                           'maxhp': 148}
         actual_stats = {'str': dragon.strength,
                         'con': dragon.constitution,
@@ -160,7 +160,7 @@ class DragonTestCase(unittest.TestCase):
     def test_green_dragon_tail_swipe(self):
         dragon = monsters.GreenDragon()
         dragon.tail_swipe(self.dummy)
-        self.assertEqual(self.dummy.hp, self.dummy.maxhp - 24)
+        self.assertEqual(self.dummy.hp, self.dummy.maxhp - 45)
 
     def test_green_dragon_breath_weapon(self):
         dragon = monsters.GreenDragon()
@@ -185,8 +185,8 @@ class UndeadTestCase(unittest.TestCase):
         expected_stats = {'str': 8,
                           'con': 2,
                           'int': 16,
-                          'spd': 8,
-                          'maxhp': 30}
+                          'spd': 12,
+                          'maxhp': 45}
         actual_stats = {'str': vampire.strength,
                         'con': vampire.constitution,
                         'int': vampire.intelligence,
@@ -201,8 +201,8 @@ class UndeadTestCase(unittest.TestCase):
         expected_stats = {'str': 12,
                           'con': 3,
                           'int': 24,
-                          'spd': 12,
-                          'maxhp': 36}
+                          'spd': 16,
+                          'maxhp': 51}
         actual_stats = {'str': vampire.strength,
                         'con': vampire.constitution,
                         'int': vampire.intelligence,
@@ -221,7 +221,7 @@ class UndeadTestCase(unittest.TestCase):
         self.assertEqual(vampire.hp, vampire.maxhp)
 
     def test_vampire_bite(self):
-        bite_damage = 4
+        bite_damage = 24
         vampire = monsters.Vampire()
         vampire.take_damage(1)
         self.assertNotEqual(vampire.hp, vampire.maxhp)
@@ -236,8 +236,8 @@ class UndeadTestCase(unittest.TestCase):
         expected_stats = {'str': 10,
                           'con': 2,
                           'int': 2,
-                          'spd': 4,
-                          'maxhp': 10}
+                          'spd': 6,
+                          'maxhp': 30}
         actual_stats = {'str': skeleton.strength,
                         'con': skeleton.constitution,
                         'int': skeleton.intelligence,
@@ -252,8 +252,8 @@ class UndeadTestCase(unittest.TestCase):
         expected_stats = {'str': 15,
                           'con': 3,
                           'int': 3,
-                          'spd': 6,
-                          'maxhp': 16}
+                          'spd': 8,
+                          'maxhp': 36}
         actual_stats = {'str': skeleton.strength,
                         'con': skeleton.constitution,
                         'int': skeleton.intelligence,
@@ -296,7 +296,7 @@ class HumanoidTestCase(unittest.TestCase):
         expected_stats = {'str': 14,
                           'con': 12,
                           'int': 8,
-                          'spd': 8,
+                          'spd': 12,
                           'maxhp': 20}
         actual_stats = {'str': troll.strength,
                         'con': troll.constitution,
@@ -312,7 +312,7 @@ class HumanoidTestCase(unittest.TestCase):
         expected_stats = {'str': 21,
                           'con': 18,
                           'int': 12,
-                          'spd': 12,
+                          'spd': 16,
                           'maxhp': 56}
         actual_stats = {'str': troll.strength,
                         'con': troll.constitution,
@@ -326,7 +326,7 @@ class HumanoidTestCase(unittest.TestCase):
     def test_troll_slash(self):
         troll = monsters.Troll()
         troll.slash(self.dummy)
-        self.assertEqual(self.dummy.hp, self.dummy.maxhp - 22)
+        self.assertEqual(self.dummy.hp, self.dummy.maxhp - 26)
 
     def test_troll_regenerate(self):
         troll = monsters.Troll()
@@ -339,7 +339,7 @@ class HumanoidTestCase(unittest.TestCase):
         expected_stats = {'str': 14,
                           'con': 8,
                           'int': 8,
-                          'spd': 8,
+                          'spd': 12,
                           'maxhp': 16}
         actual_stats = {'str': orc.strength,
                         'con': orc.constitution,
@@ -355,7 +355,7 @@ class HumanoidTestCase(unittest.TestCase):
         expected_stats = {'str': 21,
                           'con': 12,
                           'int': 12,
-                          'spd': 12,
+                          'spd': 16,
                           'maxhp': 40}
         actual_stats = {'str': orc.strength,
                         'con': orc.constitution,
@@ -369,7 +369,7 @@ class HumanoidTestCase(unittest.TestCase):
     def test_orc_slash(self):
         orc = monsters.Orc()
         orc.slash(self.dummy)
-        self.assertEqual(self.dummy.hp, self.dummy.maxhp - 22)
+        self.assertEqual(self.dummy.hp, self.dummy.maxhp - 26)
 
     def test_orc_blood_rage(self):
         orc = monsters.Orc()
