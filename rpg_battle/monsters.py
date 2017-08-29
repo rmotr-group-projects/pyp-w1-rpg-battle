@@ -14,39 +14,65 @@ class Monster(object):
         """
         Sets up stats and levels up the monster if necessary
         """
-        pass
+        self.level = level
+        
+        multipliers = getattr(self, 'MULTIPLIERS', {})
+        base_hp = getattr(self, 'BASE_HP', Monster.BASE_HP)
+        for stat, base in Monster.BASE_STATS.items():
+            setattr(self, stat, int(base * multipliers.get(stat, 1)))
+        if self.level > 1:
+            for stat in Monster.BASE_STATS:
+                current = getattr(self, stat)
+                increase = (self.level - 1) * multipliers.get(stat, 1)
+                new = int(increase + current)
+                setattr(self, stat, new)
+            
+        self.maxhp = base_hp + int((self.level - 1) * self.constitution / 2)
+        self.hp = self.maxhp
 
     def xp(self):
         """
         Returns the xp value of monster if defeated.
         XP value formula: ((average of stats) + (maxhp / 10)) * xp multiplier
         """
-        pass
+        stat_avg = (self.strength + self.constitution + self.intelligence + self.speed) / 4
+        return int(self.XP_MULTIPLIER *  (stat_avg + (self.maxhp / 10)))
 
     def fight(self, target):
         """
         Attacks target dealing damage equal to strength
         """
-        pass
+        target.take_damage(self.strength)
 
 
     def take_damage(self, damage):
         """
         Reduce hp by damage taken.
         """
-        pass
+        self.hp -= damage
+        if self.hp < 0:
+            self.hp = 0
 
     def heal_damage(self, healing):
         """
         Increase hp by healing but not exceeding maxhp
         """
-        pass
+        if self.is_dead():
+            raise Defeat()
+        heals = self.hp + healing
+        if heals >= self.maxhp:
+            self.hp = self.maxhp
+        else:
+            self.hp = heals
 
     def is_dead(self):
         """
         Returns True if out of hp
         """
-        pass
+        if self.hp <= 0:
+            return True
+        else:
+            return False
 
     def attack(self, target):
         """
@@ -65,11 +91,21 @@ class Dragon(Monster):
     BASE_HP = 100
     XP_MULTIPLIER = 2
 
+    def take_damage(self, damage):
+        """
+        Reduce hp by damage taken.
+        """
+        dmg = (damage - 5)
+        self.hp -= (dmg if dmg >= 0 else 0)
+        if self.hp < 0:
+            self.hp = 0
+
     def tail_swipe(self, target):
         """
         damage: 1.5*(strength + speed)
         """
-        pass
+        target.take_damage(1.5 * (self.strength + self.speed))
+       
 
 
 class RedDragon(Dragon):
@@ -86,8 +122,7 @@ class RedDragon(Dragon):
         """
         damage: intelligence * 3
         """
-        pass
-
+        target.take_damage(3 * self.intelligence)
 
 class GreenDragon(Dragon):
     """
@@ -103,7 +138,7 @@ class GreenDragon(Dragon):
         """
         damage: (intelligence + constitution) * 1.5
         """
-        pass
+        target.take_damage(1.5 * (self.intelligence + self.constitution))
 
 
 
@@ -114,13 +149,19 @@ class Undead(Monster):
     """
     MULTIPLIERS = {'constitution': 0.25}
 
+    def heal_damage(self, healing):
+        self.take_damage(healing)
 
     def life_drain(self, target):
         """
         damage: intelligence * 1.5
         heals unit for damage done
         """
-        pass
+        dmg = 1.5 * self.intelligence
+        target.take_damage(dmg)
+        self.hp += dmg
+        if self.hp > self.maxhp:
+            self.hp = self.maxhp
 
 
 
@@ -140,7 +181,13 @@ class Vampire(Undead):
         also reduces target's maxhp by amount equal to damage done
         heals unit for damage done
         """
-        pass
+        dmg = 2 * self.speed
+        target.take_damage(dmg)
+        target.maxhp -= dmg
+        self.hp += dmg
+        if self.hp > self.maxhp:
+            self.hp = self.maxhp
+
 
 
 
@@ -161,7 +208,7 @@ class Skeleton(Undead):
         """
         damage: strength * 2
         """
-        pass
+        target.take_damage(2 * self.strength)
 
 
 class Humanoid(Monster):
@@ -169,7 +216,7 @@ class Humanoid(Monster):
         """
         damage: strength + speed
         """
-        pass
+        target.take_damage(self.strength + self.speed)
 
 
 class Troll(Humanoid):
@@ -187,7 +234,7 @@ class Troll(Humanoid):
         """
         heals self for constitution
         """
-        pass
+        self.hp += self.constitution
 
 
 class Orc(Humanoid):
@@ -205,6 +252,7 @@ class Orc(Humanoid):
         cost: constitution * 0.5 hp
         damage: strength * 2
         """
-        pass
+        self.hp -= 0.5 * self.constitution
+        target.take_damage(2 * self.strength)
 
         
