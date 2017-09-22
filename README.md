@@ -253,7 +253,9 @@ Rogue
 ----------
 
 > **Stats**
-> Monsters start with a base stat level of 8 for all stats except speed versus the 6 that heroes receive, monster speed has a base of 12. Instead of receiving stat modifiers like heroes, monsters may receive stat multiplier instead. These are applied in the following manner: At level 1 a stat is set to `base value` x the stat multiplier. For levelled monsters set the stat to `base value` X multiplier + `(level - 1)` x multiplier, dropping fractions.
+> Monsters start with a base stat level of 8 for all stats except speed versus the 6 that heroes receive, monster speed has a base of 12. Instead of receiving stat modifiers like heroes, monsters may receive stat multiplier instead. These are applied in the following manner: At level 1 a stat is set to `base value` x the stat multiplier. 
+
+For levelled monsters set the stat to `base value` X multiplier + `(level - 1)` x multiplier, dropping fractions.
 > Monster have a base HP of 10 (this may be overidden by monster families and subtypes, more on this later) to calculate their actual `maxhp` use the base hp + (level - 1) x (0.5x `constitution`), dropping fractions as usual.
 > 
 

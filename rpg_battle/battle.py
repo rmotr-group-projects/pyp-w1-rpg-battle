@@ -8,26 +8,27 @@ class Battle(object):
         """
         determines initiative order using unit speed
         """
-        pass
+        self.participants = participants
+        self.initiative = sorted(participants, key=lambda x: x.speed)
 
 
     def current_attacker(self):
         """
         returns unit at front of initiative queue
         """
-        pass
+        return self.initiative[-1]
 
     def is_hero_turn(self):
         """
         returns True if current_attacker is a Hero
         """
-        pass
+        return isinstance(self.current_attacker(), Hero)
 
     def is_monster_turn(self):
         """
         returns True if current_attacker is a Monster
         """
-        pass
+        return isinstance(self.current_attacker(), Monster)
 
     def next_turn(self):
         """
@@ -46,7 +47,10 @@ class Battle(object):
         Raises Victory if all monsters defeated
         Raises Defeat if all party members defeated
         """
-        pass
+        if self._check_victory():
+            raise Victory
+        if self._check_defeat():
+            raise Defeat
 
     def _hero_turn(self):
         """
