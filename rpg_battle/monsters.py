@@ -14,45 +14,83 @@ class Monster(object):
         """
         Sets up stats and levels up the monster if necessary
         """
-        pass
-
+        for stat, statValue in self.BASE_STATS.iteritems():
+            if hasattr(self, 'MULTIPLIERS'):
+                multiplier = self.MULTIPLIERS.get(stat, 1)
+            else:
+                multiplier = 1
+            setattr(self, stat, int((statValue * multiplier) + multiplier* (level - 1)))
+            
+        self.maxhp = self.BASE_HP + int(0.5 * self.constitution * (level - 1))
+        self.hp = self.maxhp
+        
+        self.level = level
+        
     def xp(self):
         """
         Returns the xp value of monster if defeated.
         XP value formula: ((average of stats) + (maxhp / 10)) * xp multiplier
         """
-        pass
+        return int(((sum([getattr(self, stat) for stat in self.BASE_STATS]) / 4) + (self.maxhp / 10)) * self.XP_MULTIPLIER)
 
     def fight(self, target):
         """
         Attacks target dealing damage equal to strength
         """
-        pass
-
+        damage = self.strength
+        target.take_damage(damage)
+        return self._combat_message(target,'fight', damage)
 
     def take_damage(self, damage):
         """
         Reduce hp by damage taken.
         """
-        pass
+        self.hp -= damage
+        if self.hp < 0:
+            self.hp = 0
 
     def heal_damage(self, healing):
         """
         Increase hp by healing but not exceeding maxhp
         """
-        pass
+        self.hp += healing
+        if self.hp > self.maxhp:
+            self.hp = self.maxhp
 
     def is_dead(self):
         """
         Returns True if out of hp
         """
-        pass
+        if self.hp <= 0:
+            return True
+        else:
+            return False
 
     def attack(self, target):
         """
         Attacks target using next ability in command queue
         """
-        pass
+        attackVal = self.command_queue.popleft()
+        ability = getattr(self, attackVal)
+        log = ability(target)
+        self.command_queue.append(attackVal)
+        
+        return log
+        
+        
+    def _combat_message(self, target, ability, damage):
+        
+        if ability == 'fight':
+            return ["{monster} attacks {target} for {damage}!".format(
+                monster = self.__class__.__name__,
+                target = target.__class__.__name__,
+                damage = damage)]
+                
+        return ["{monster} hits {target} with {ability} for {damage}!".format(
+            monster = self.__class__.__name__,
+            target = target.__class__.__name__,
+            ability = ability,
+            damage = damage)]
 
 
 class Dragon(Monster):
@@ -69,8 +107,15 @@ class Dragon(Monster):
         """
         damage: 1.5*(strength + speed)
         """
-        pass
+        damage = int(1.5* (self.strength + self.speed))
+        target.take_damage(damage)
+        return self._combat_message(target,'tail swipe', damage)
 
+    
+    def take_damage(self, damage):
+        damage -= 5
+        if damage > 0:
+            super(Dragon, self).take_damage(damage)
 
 class RedDragon(Dragon):
     """
@@ -82,11 +127,18 @@ class RedDragon(Dragon):
     MULTIPLIERS.update({'strength': 2,
                         'intelligence': 1.5})
     
+    def __init__(self, *args, **kwargs):
+        super(RedDragon, self).__init__(*args, **kwargs)
+        self.command_queue = deque(['fire breath', 'tail swipe', 'fight'])
+    
     def fire_breath(self, target):
         """
         damage: intelligence * 3
         """
-        pass
+        damage = self.intelligence * 3
+        target.take_damage(damage)
+        return self._combat_message(target,'fire breath', damage)
+
 
 
 class GreenDragon(Dragon):
@@ -99,11 +151,19 @@ class GreenDragon(Dragon):
     MULTIPLIERS.update({'strength': 1.5,
                         'speed': 1.5})
     
+    
+    def __init__(self, *args, **kwargs):
+        super(GreenDragon, self).__init__(*args, **kwargs)
+        self.command_queue = deque(['poison breath', 'tail swipe',  'fight'])
+        
     def poison_breath(self, target):
         """
         damage: (intelligence + constitution) * 1.5
         """
-        pass
+        damage = int(1.5 * (self.intelligence + self.constitution))
+        target.take_damage(damage)
+        return self._combat_message(target,'poison breath', damage)
+
 
 
 
@@ -120,9 +180,16 @@ class Undead(Monster):
         damage: intelligence * 1.5
         heals unit for damage done
         """
-        pass
-
-
+        damage = int(1.5*self.intelligence)
+        target.take_damage(damage)
+        super(Undead, self).heal_damage(damage)
+        message = self._combat_message(target, damage, 'drain life')
+        message.append('{monster} heals for {healing}!'.format(monster=type(self).__name__,
+                                                               healing=damage))
+        return message
+        
+    def heal_damage(self, healing):
+        self.take_damage(healing)
 
 class Vampire(Undead):
     """
@@ -134,15 +201,29 @@ class Vampire(Undead):
     MULTIPLIERS.update({'intelligence': 2})
     BASE_HP = 45
 
+    
+    def __init__(self, *args, **kwargs):
+        super(Vampire, self).__init__(*args, **kwargs)
+        self.command_queue = deque([ 'fight', 'bite', 'life drain'])
+        
+        
     def bite(self, target):
         """
         damage: speed * 2
         also reduces target's maxhp by amount equal to damage done
         heals unit for damage done
         """
-        pass
-
-
+        damage = 2 * self.speed
+        target.take_damage(damage)
+        target.maxhp -= damage
+        
+        Monster.heal_damage(self, damage)
+        message = self._combat_message(target, damage, 'bite')
+        message.append("{target}'s maximum hp has been reduced by {damage}!".format(target=target.__class__.__name__,
+                                                                                    damage=damage))
+        message.append("{monster} heals for {healing}!".format(monster=type(self).__name__,
+                                                               healing=damage))
+        return message
 
 class Skeleton(Undead):
     """
@@ -157,19 +238,30 @@ class Skeleton(Undead):
                         'intelligence': 0.25})
     BASE_HP = 30
 
+    def __init__(self, *args, **kwargs):
+        super(Skeleton, self).__init__(*args, **kwargs)
+        self.command_queue = deque(['bash', 'fight', 'life drain'])
+     
     def bash(self, target):
         """
         damage: strength * 2
         """
-        pass
+        damage = 2 * self.strength
+        target.take_damage(damage)
+        return self._combat_message(target,'bash', damage)
 
+
+        
 
 class Humanoid(Monster):
     def slash(self, target):
         """
         damage: strength + speed
         """
-        pass
+        damage = self.strength + self.speed
+        target.take_damage(damage)
+        return self._combat_message(target,'slash', damage)
+
 
 
 class Troll(Humanoid):
@@ -183,11 +275,18 @@ class Troll(Humanoid):
                    'constitution': 1.5}
     BASE_HP = 20
 
+    def __init__(self, *args, **kwargs):
+        super(Troll, self).__init__(*args, **kwargs)
+        self.command_queue = deque([ 'slash', 'fight', 'regenerate'])
+     
     def regenerate(self, *args):
         """
         heals self for constitution
         """
-        pass
+        healing = self.constitution
+        self.heal_damage(healing)
+        return ['{monster} regenerates {healing} health!'.format(monster=type(self).__name__,
+                                                                   healing=healing)]
 
 
 class Orc(Humanoid):
@@ -200,11 +299,25 @@ class Orc(Humanoid):
     BASE_HP = 16
     XP_MULTIPLIER = 0.5
 
+    
+    def __init__(self, *args, **kwargs):
+        super(Orc, self).__init__(*args, **kwargs)
+        self.command_queue = deque(['blood rage', 'slash', 'fight'])
+        
+        
     def blood_rage(self, target):
         """
         cost: constitution * 0.5 hp
         damage: strength * 2
         """
-        pass
+        damage = 2 * self.strength
+        target.take_damage(damage)
+        
+        cost = int(0.5*self.constitution)
+        self.take_damage(cost)
+        message = self._combat_message(target,'blood rage', damage)
+        message.append('{monster} takes {damage} self-inflicted damage!'.format(monster=type(self).__name__,
+                                                                                damage=cost))
+        return message
 
         
